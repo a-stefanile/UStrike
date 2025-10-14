@@ -1,0 +1,299 @@
+\documentclass[a4paper]{article}
+
+% --- PACCHETTI NECESSARI ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{parskip} % Aggiunge spazio tra i paragrafi invece del rientro
+\usepackage{enumitem} % Per personalizzare le liste
+\usepackage{hyperref} % Per i link nel PDF (es. nell'indice)
+
+% Impostazione dei margini (Aggiornati ai valori del nuovo Problem Statement per uniformità)
+\geometry{
+	a4paper,
+	left=2.5cm,
+	right=2.5cm,
+	top=3cm,
+	bottom=3cm,
+}
+
+% --- INIZIO DEL DOCUMENTO ---
+\begin{document}
+
+% --- PAGINA DEL TITOLO ---
+\begin{titlepage}
+	\centering
+	
+	% Informazioni Università e Corso
+	{\large Università degli Studi di Salerno\par}
+	{\large Corso di Ingegneria del Software\par}
+	
+	\vfill % Spazio verticale
+	
+	% Logo (assicurati di avere un file 'logo.png' nella stessa cartella)
+	\includegraphics[width=0.6\textwidth]{logo.png}
+	
+	\vspace{1cm} % Spazio verticale
+	
+	% Titolo e Sottotitolo
+	{\Huge \textbf{UStrike!}}\par
+	\vspace{0.5cm}
+	{\Large Problem Statement\par} 
+	
+	\vfill % Spazio verticale
+	
+	% Versione e Data
+	Versione 1.1\par 
+	\vspace{0.2cm}
+	Data: 13/10/2025 
+	
+\end{titlepage}
+
+
+% --- PAGINA DEI METADATI & REVISION HISTORY ---
+\newpage
+\section*{Informazioni sul Progetto}
+\label{sec:info}
+\renewcommand{\arraystretch}{1.2} % Aumenta lo spazio tra le righe delle tabelle
+
+\begin{tabular}{@{}l l}
+	\textbf{Progetto:} & UStrike! \\
+	\textbf{Documento:} & Problem Statement \\ 
+	\textbf{Versione:} & 1.1 \\ 
+	\textbf{Data:} & 13/10/2025 \\ 
+\end{tabular}
+
+\vspace{1cm}
+
+\noindent\textbf{Coordinatore del progetto:} \\
+Nome \\
+Matricola
+
+\vspace{1cm}
+
+\noindent\textbf{Partecipanti:}
+\begin{center}
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Nome} & \textbf{Matricola} \\
+		\hline
+		Russo Serena & 0512119098 \\
+		Stefanile Andrea & 0512119557 \\
+		Valito Marcello & 0512119014 \\
+		\hline
+	\end{tabular}
+\end{center}
+
+\vspace{1cm}
+
+\noindent\textbf{Scritto da:} \\
+Russo Serena, Stefanile Andrea, Valito Marcello
+
+\vspace{1.5cm}
+
+\subsection*{Revision History}
+\begin{center}
+	\begin{tabular}{|p{2.5cm}|p{1.5cm}|p{6cm}|p{4cm}|}
+		\hline
+		\textbf{Data} & \textbf{Versione} & \textbf{Descrizione} & \textbf{Autore} \\
+		\hline
+		12/10/2025 & 1.0 & Problem Statement, scenario, requisiti funzionali & Russo Serena, Stefanile Andrea, Valito Marcello\\
+		\hline
+		13/10/2025 & 1.1 & Problem Statement, requisiti non funzionali, target environment e deadlines & Russo Serena, Stefanile Andrea, Valito Marcello \\
+		\hline
+	\end{tabular}
+\end{center}
+
+\vfill
+\begin{flushright}
+	\textit{Ingegneria del Software} \\
+\end{flushright}
+
+
+% --- INDICE ---
+\newpage
+\tableofcontents
+\newpage 
+
+% --------------------------------------------------------
+% --- CONTENUTO PRINCIPALE ---
+% --------------------------------------------------------
+
+% --- 1. PROBLEM DOMAIN ---
+\section{Problem Domain}
+
+Nel settore dell'intrattenimento, strutture come sale da bowling e arcade si affidano ancora a metodi di gestione tradizionali, quali prenotazioni telefoniche e agende cartacee. Questo approccio manuale presenta diverse criticità: è soggetto a errori umani (prenotazioni sovrapposte o registrate in modo errato), risulta inefficiente durante le ore di punta e offre un'esperienza cliente poco moderna e frammentata.
+
+Manca una piattaforma digitale unificata che possa semplificare e automatizzare la gestione delle prenotazioni per i vari servizi offerti (bowling, biliardo, go-kart). L'obiettivo del progetto \textbf{UStrike!} è colmare questa lacuna, creando un sistema centralizzato che migliori l'efficienza operativa dello staff e l'esperienza complessiva del cliente, riducendo gli errori e ottimizzando l'interazione tra l'arcade e il suo pubblico.
+
+% --- 2. SCENARI ---
+\section{Scenari}
+
+Di seguito sono riportati alcuni scenari d'uso che illustrano le interazioni chiave con il sistema.
+
+\subsection{Scenario: \texttt{prenotazioneSerataGruppo}}
+\begin{itemize}[leftmargin=*]
+	\item \textbf{Istanze di attori partecipanti:} \texttt{giulia:Cliente}, \texttt{marco:Staff}
+	\item \textbf{Flusso degli eventi:}
+	\begin{enumerate}
+		\item Giulia vuole organizzare un'uscita di gruppo e accede al sistema UStrike! per prenotare.
+		\item Dopo aver creato un account ed effettuato il login, visualizza i servizi disponibili e sceglie due piste da bowling per sabato sera.
+		\item Completa la prenotazione e riceve una notifica con lo stato ``in attesa''.
+		\item Marco, membro dello staff, accede alla sua dashboard e visualizza la nuova richiesta.
+		\item Verifica la disponibilità e conferma la prenotazione.
+		\item Giulia riceve la notifica di conferma e il suo stato di prenotazione viene aggiornato a ``confermata''.
+		\item All'arrivo, Marco recupera facilmente la prenotazione dal sistema, garantendo un check-in rapido.
+	\end{enumerate}
+\end{itemize}
+
+\subsection{Scenario: \texttt{gestioneTurniSettimanali}}
+\begin{itemize}[leftmargin=*]
+	\item \textbf{Istanze di attori partecipanti:} \texttt{elena:Manager}, \texttt{marco:Staff}
+	\item \textbf{Flusso degli eventi:}
+	\begin{enumerate}
+		\item Elena, la manager, deve pianificare i turni di lavoro della settimana.
+		\item Accede al sistema con il suo account ed entra nella sezione di gestione delle turnistiche.
+		\item Crea i turni, specificando orari e ruoli, e li assegna ai membri dello staff, tra cui Marco.
+		\item Una volta pubblicato l'orario, Marco accede al suo profilo.
+		\item Visualizza i suoi turni di lavoro assegnati per la settimana tramite l'apposita funzione.
+	\end{enumerate}
+\end{itemize}
+
+\subsection{Scenario: \texttt{eliminazionePrenotazione}}
+\begin{itemize}[leftmargin=*]
+	\item \textbf{Istanze di attori partecipanti:} \texttt{matteo:Cliente}, \texttt{sara:Staff}
+	\item \textbf{Flusso degli eventi:}
+	\begin{enumerate}
+		\item Matteo ha una prenotazione per una pista da bowling ma deve cancellarla a causa di un imprevisto.
+		\item Accede al suo account UStrike! e visualizza le sue prenotazioni attive.
+		\item Seleziona la prenotazione in questione e sceglie l'opzione per annullarla.
+		\item Sara, membro dello staff, riceve una notifica nel pannello di gestione delle prenotazioni riguardo alla cancellazione.
+		\item Il sistema aggiorna automaticamente lo stato della prenotazione a ``annullata'' e libera lo slot, rendendolo nuovamente disponibile per altri clienti.
+		\item Matteo riceve una conferma dell'avvenuto annullamento.
+	\end{enumerate}
+\end{itemize}
+
+\subsection{Scenario: \texttt{aggiornamentoPremiCatalogo}}
+\begin{itemize}[leftmargin=*]
+	\item \textbf{Istanze di attori partecipanti:} \texttt{marco:Staff}
+	\item \textbf{Flusso degli eventi:}
+	\begin{enumerate}
+		\item A Marco viene chiesto di aggiornare il catalogo dei premi riscattabili con i ticket vinti nell'area arcade.
+		\item Accede al sistema con il suo profilo staff.
+		\item Entra nella sezione ``Gestione pagina premi con ticket''.
+		\item Rimuove un premio esaurito e aggiunge un nuovo articolo, caricando una descrizione e impostando il valore in ticket necessario per il riscatto.
+		\item Salva le modifiche, che sono immediatamente visibili ai clienti.
+	\end{enumerate}
+\end{itemize}
+
+% --- 3. REQUISITI FUNZIONALI ---
+\section{Requisiti Funzionali}
+
+Sulla base del documento di progetto, i requisiti funzionali sono suddivisi per tipologia di utente.
+
+\subsection{Funzionalità Comuni}
+\begin{itemize}
+	\item Il sistema deve permettere a tutti gli utenti di creare un account ed effettuare il login.
+	\item Il sistema deve consentire a tutti gli utenti di visualizzare i servizi offerti dall'arcade e le relative informazioni.
+\end{itemize}
+
+\subsection{Funzionalità per i Clienti}
+\begin{itemize}
+	\item Il sistema deve permettere ai clienti di prenotare una pista da bowling, un tavolo da biliardo o una pista go-kart, scegliendo data e orario.
+	\item Il sistema deve consentire ai clienti di consultare lo stato (confermata, in attesa, annullata) e i dettagli delle proprie prenotazioni.
+\end{itemize}
+
+\subsection{Funzionalità per lo Staff}
+\begin{itemize}
+	\item Il sistema deve permettere allo staff di visualizzare, confermare, modificare o annullare le prenotazioni dei clienti.
+	\item Il sistema deve consentire allo staff di aggiornare e gestire il catalogo dei premi riscattabili con i ticket.
+	\item Il sistema deve permettere ai membri dello staff di visualizzare i propri turni di lavoro.
+\end{itemize}
+
+\subsection{Funzionalità per il Manager Staff}
+\begin{itemize}
+	\item Il sistema deve permettere al manager di creare, assegnare e modificare i turni di lavoro per tutti i membri dello staff.
+\end{itemize}
+
+% --- 4. REQUISITI NON FUNZIONALI ---
+\section{Requisiti Non Funzionali} % Rimosso il grassetto da "Requisiti Non Funzionali"
+
+La versione 1.0 del progetto non specificava requisiti non funzionali. Di seguito, vengono definiti i requisiti di usabilità, affidabilità, performance, supportabilità e legalità.
+
+\subsection{Usabilità} % Rimosso il grassetto da "Usabilità"
+\begin{itemize}
+	\item Autonomia dell’utente: La piattaforma deve essere progettata per essere intuitiva, permettendo a un visitatore che la utilizza per la prima volta di prenotare senza bisogno di aiuto. L'interfaccia deve accompagnare l’utente passo dopo passo, con testi chiari, pulsanti ben visibili e una struttura che renda tutto immediatamente comprensibile.
+	\item Semplicità del flusso di prenotazione: Il processo di prenotazione deve essere semplice e diretto, richiedendo all'utente un massimo di 6 passaggi in non più di 120 secondi. Ogni schermata deve avere un obiettivo chiaro (selezione del servizio, scelta data/ora, rivedere e confermare), con solo i campi essenziali.
+	\item Accessibilità: Tutte le pagine pubbliche e di prenotazione devono essere facilmente raggiungibili. I contenuti devono essere accessibili tramite tastiera; i contrasti devono assicurare una lettura agevole dei testi e degli elementi interattivi; le dimensioni dei target di tocco devono essere adeguate per l'uso su dispositivi mobili.
+\end{itemize}
+
+\subsection{Affidabilità}
+\begin{itemize}
+	\item Robustezza: Il sistema è progettato per continuare a funzionare anche in caso di problemi con un componente o durante picchi moderati di traffico. Se un servizio esterno, come email, SMS o pagamenti, dovesse guastarsi, le funzionalità principali rimangono operative e le richieste verso quel servizio vengono ripetute fino a due volte. In caso di un blocco totale, il servizio si riattiva automaticamente, assicurando che le operazioni non rimangano “a metà”: ogni prenotazione sarà o confermata o annullata dopo un processo di riconciliazione che si occupa di sistemare le transazioni interrotte.
+	\item Sicurezza: Il sistema è progettato per prevenire situazioni problematiche, come l’overbooking, evitando di avere due prenotazioni sullo stesso servizio nella stessa fascia oraria. Se la disponibilità è incerta, la prenotazione viene rifiutata piuttosto che confermata in modo ambiguo.
+	\item Protezione: Le password degli utenti non vengono mai memorizzate in chiaro. Il sistema utilizza un algoritmo di hashing specifico per le password e salva solo l’hash risultante. Dopo il login, l’utente riceve token di sessione a breve termine che possono essere revocati in qualsiasi momento (ad esempio in caso di logout). Questi token sono trasmessi in cookie contrassegnati come HttpOnly e Secure. Il traffico tra browser, applicazione e API è forzato su HTTPS e utilizza protocolli TLS per cifrare i dati sensibili in transito. Inoltre, le interazioni con il database utilizzano prepared statements, evitando la concatenazione di stringhe con input dell’utente per prevenire SQL injection. L’applicazione adotta un modello a ruoli per il controllo degli accessi, consentendo ogni funzionalità solo se esplicitamente autorizzata per il ruolo dell’utente (cliente, staff, manager).
+\end{itemize}
+
+\subsection{Performance}
+\begin{itemize}
+	\item Velocità delle azioni principali: Quando un cliente apre la disponibilità dei servizi (come bowling, biliardo o go-kart) o decide di confermare o annullare una prenotazione, la pagina deve rispondere entro 1,5 secondi.
+	\item Carico elevato di utenti: Il sistema deve essere in grado di gestire fino a 200 persone contemporaneamente, senza mostrare messaggi di errore e rispettando i tempi indicati nel punto precedente.
+	\item Prestazioni garantite nei momenti di punta: Se si supera la capacità massima, il sistema deve rifiutare immediatamente nuove richieste, evitando di rallentare il servizio per tutti gli utenti già attivi.
+\end{itemize}
+
+\subsection{Supportabilità}
+\begin{itemize}
+	\item Compatibilità Display: L'interfaccia è stata progettata per essere utilizzata su schermi che vanno da 360 px a 1920 px, coprendo così tutti i dispositivi senza compromettere le funzionalità della piattaforma.
+	\item Compatibilità Browser: Il sistema funziona senza intoppi su browser supportati - come Chrome, Firefox, Edge e Safari - assicurando che le operazioni principali siano sempre accessibili e coerenti.
+\end{itemize}
+
+\subsection{Legalità}
+\begin{itemize}
+	\item Diritti d'autore del progetto: Il progetto UStrike! è destinato unicamente alla valutazione del corso. Il codice e la documentazione rimangono di proprietà degli autori e non possono essere riutilizzati o ridistribuiti al di fuori dell’esame.
+	\item Proprietà dei dati: I dati dimostrativi, come prenotazioni, clienti e incassi di prova, sono di proprietà del titolare dell’istanza e possono essere esportati in formati comuni (CSV/JSON).
+\end{itemize}
+
+% --- 5. TARGET ENVIRONMENT ---
+\section{Target Environment}
+\label{sec:target_environment}
+
+Tutti i membri del team lavorano su Windows 11 utilizzando IntelliJ IDEA con JDK 21; l’applicazione viene avviata direttamente dall’IDE tramite una normale configurazione di run. Il backend si appoggia a un’istanza locale di MySQL Server 8.0, amministrata con MySQL Workbench. Lo schema del database, le migrazioni SQL e i dati di demo sono tracciati nel repository e applicati mediante script dedicati, così gli ambienti restano sempre allineati. La configurazione è esterna e accentrata in un solo file \texttt{.env}, garantendo che password e altre credenziali riservate non siano mai parte integrante del codice.
+
+% --- 6. DEADLINES ---
+\section{Deadlines}
+\label{sec:deadlines}
+
+\noindent Di seguito è riportata la pianificazione delle scadenze di progetto:
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{10cm}|}
+\hline
+\textbf{Data} & \textbf{Documento / Attività} \\
+\hline
+7 ottobre & Start-up del progetto, creazione repository GitHub, kick-off meeting\\
+\hline
+14 ottobre & Problem Statement, scenari, requisiti funzionali e non funzionali, target environment \\
+\hline
+28 ottobre & Requisiti e casi d’uso \\
+\hline
+11 novembre & Requirements Analysis Document \\
+\hline
+25 novembre & System Design Document \\
+\hline
+16 dicembre & Piano di test e specifica interfacce dei moduli del sistema \\
+\hline
+31 dicembre & Esecuzione dei test \\
+\hline
+15 gennaio & Object design e implementazione \\
+\hline
+20 gennaio & Consegna finale del progetto \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}
