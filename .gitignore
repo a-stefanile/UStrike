@@ -1,0 +1,8 @@
+/.settings/
+/.externalToolBuilders/
+.classpath
+.project
+.jsdtscope
+bin/
+build/
+target/
