@@ -1,7 +1,7 @@
-package com.ustrike.dao;
+package com.ustrike.model.dao;
 
 import com.ustrike.model.dto.Risorsa;
-import com.ustrike.util.DatabaseConnection;
+import com.ustrike.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class RisorsaDAO {
 
     public void insertRisorsa(int stato, int capacita, int idServizio) throws SQLException {
         String SQL = "INSERT INTO Risorsa (Stato, Capacita, IDServizio) VALUES (?, ?, ?);";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, stato);
             ps.setInt(2, capacita);
@@ -21,7 +21,7 @@ public class RisorsaDAO {
 
     public Risorsa selectRisorsa(int idRisorsa) throws SQLException {
         String SQL = "SELECT * FROM Risorsa WHERE IDRisorsa = ?;";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, idRisorsa);
             ResultSet rs = ps.executeQuery();
@@ -40,7 +40,7 @@ public class RisorsaDAO {
     public List<Risorsa> selectAllRisorse() throws SQLException {
         List<Risorsa> risorse = new ArrayList<>();
         String SQL = "SELECT * FROM Risorsa;";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -58,7 +58,7 @@ public class RisorsaDAO {
     public List<Risorsa> selectRisorseByServizio(int idServizio) throws SQLException {
         List<Risorsa> risorse = new ArrayList<>();
         String SQL = "SELECT * FROM Risorsa WHERE IDServizio = ? AND Stato = 1 ORDER BY Capacita;";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, idServizio);
             ResultSet rs = ps.executeQuery();
@@ -76,7 +76,7 @@ public class RisorsaDAO {
 
     public boolean updateRisorsa(int idRisorsa, int stato, int capacita) throws SQLException {
         String SQL = "UPDATE Risorsa SET Stato = ?, Capacita = ? WHERE IDRisorsa = ?;";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, stato);
             ps.setInt(2, capacita);
@@ -87,7 +87,7 @@ public class RisorsaDAO {
 
     public boolean deleteRisorsa(int idRisorsa) throws SQLException {
         String SQL = "DELETE FROM Risorsa WHERE IDRisorsa = ?;";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, idRisorsa);
             return ps.executeUpdate() > 0;
