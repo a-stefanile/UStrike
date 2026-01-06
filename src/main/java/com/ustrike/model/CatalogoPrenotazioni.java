@@ -11,12 +11,12 @@ public class CatalogoPrenotazioni {
     private List<Prenotazione> tuttePrenotazioni = new ArrayList<>();
     private final PrenotazioneDAO dao = new PrenotazioneDAO();
 
-    // Singleton privato
+    
     private CatalogoPrenotazioni() {
         refresh();
     }
 
-    // Bill Pugh Singleton (thread-safe) [web:77]
+    
     private static class SingletonHelper {
         private static final CatalogoPrenotazioni INSTANCE = new CatalogoPrenotazioni();
     }
@@ -25,7 +25,7 @@ public class CatalogoPrenotazioni {
         return SingletonHelper.INSTANCE;
     }
 
-    // Metodi SDD
+    
     public List<Prenotazione> getTuttePrenotazioni() {
         return new ArrayList<>(tuttePrenotazioni);
     }
