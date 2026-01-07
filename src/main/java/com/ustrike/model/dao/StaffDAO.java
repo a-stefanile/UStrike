@@ -237,4 +237,14 @@ public class StaffDAO {
         byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(bytes);
     }
+    
+    public boolean updatePassword(int idStaff, String newPasswordHash) throws SQLException {
+        String SQL = "UPDATE Staff SET Password = ? WHERE IDStaff = ?;";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQL)) {
+            ps.setString(1, newPasswordHash);
+            ps.setInt(2, idStaff);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }

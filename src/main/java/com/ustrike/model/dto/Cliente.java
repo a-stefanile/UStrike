@@ -9,22 +9,22 @@ public class Cliente implements Serializable {
     private String nomeCliente;
     private String cognomeCliente;
     private String email;
-    private String password;
+    private String passwordHash;  // ← Hash!
     private int puntiTicket;
 
     public Cliente() {}
     
     public Cliente(int idCliente, String nomeCliente, String cognomeCliente, 
-                   String email, String password, int puntiTicket) {
+                   String email, String passwordHash, int puntiTicket) {
         this.idCliente = idCliente;
         this.nomeCliente = nomeCliente;
         this.cognomeCliente = cognomeCliente;
         this.email = email;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.puntiTicket = puntiTicket;
     }
 
-    // Getter e Setter
+    // Getters/Setters
     public int getIDCliente() { return idCliente; }
     public void setIDCliente(int idCliente) { this.idCliente = idCliente; }
     
@@ -37,9 +37,11 @@ public class Cliente implements Serializable {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     
     public int getPuntiTicket() { return puntiTicket; }
     public void setPuntiTicket(int puntiTicket) { this.puntiTicket = puntiTicket; }
+    
+    public String getFullName() { return nomeCliente + " " + cognomeCliente; }
 }
