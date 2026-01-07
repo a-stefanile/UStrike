@@ -9,7 +9,7 @@ import java.util.List;
 public class PrenotazioneService {
     private final PrenotazioneDAO dao = new PrenotazioneDAO();
 
-    // 📋 CATALOGO STAFF (In Attesa)
+    // CATALOGO STAFF (In Attesa)
     public List<Prenotazione> getCatalogoInAttesa() {
         try {
             return dao.selectPrenotazioniInAttesa();
@@ -18,7 +18,7 @@ public class PrenotazioneService {
         }
     }
 
-    // 👤 CLIENTE (cache + DAO)
+    //  CLIENTE (cache + DAO)
     public List<Prenotazione> getPrenotazioniCliente(int idCliente, HttpSession session) {
         if (session != null) {
             String cacheKey = "prenotazioni_" + idCliente;
@@ -49,7 +49,7 @@ public class PrenotazioneService {
         }
     }
 
-    // ✅ STAFF ACCETTA
+    // STAFF ACCETTA
     public boolean accettaPrenotazione(int idPrenotazione, int idStaff) {
         try {
             return dao.updateStatoPrenotazione(idPrenotazione, "Confermata", idStaff);
@@ -58,7 +58,7 @@ public class PrenotazioneService {
         }
     }
 
-    // ❌ STAFF RIFIUTA
+    // STAFF RIFIUTA
     public boolean rifiutaPrenotazione(int idPrenotazione, int idStaff, String motivo) {
         try {
             return dao.updateStatoPrenotazione(idPrenotazione, "Rifiutata", idStaff);
@@ -66,8 +66,16 @@ public class PrenotazioneService {
             throw new RuntimeException("Errore rifiuto", e);
         }
     }
+    
+    public List<Prenotazione> getCatalogoCompletate() {
+        try {
+            return dao.selectPrenotazioniCompletate();
+        } catch (Exception e) {
+            throw new RuntimeException("Errore catalogo completate", e);
+        }
+    }
 
-    // 🔄 TEST STANDALONE (senza session/singleton)
+    // TEST STANDALONE (senza session/singleton)
     public List<Prenotazione> getCatalogoTest() throws Exception {
         return dao.selectPrenotazioniInAttesa();
     }

@@ -122,6 +122,19 @@ public class PrenotazioneDAO {
         );
     }
     
+    public List<Prenotazione> selectPrenotazioniCompletate() throws SQLException {
+        List<Prenotazione> prenotazioni = new ArrayList<>();
+        String SQL = "SELECT * FROM Prenotazione WHERE StatoPrenotazione IN ('Confermata', 'Rifiutata') ORDER BY Orario DESC;";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQL)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                prenotazioni.add(mapResultSetToPrenotazione(rs));
+            }
+        }
+        return prenotazioni;
+    }
+    
     public List<Prenotazione> selectAllPrenotazioni() throws SQLException {
         List<Prenotazione> tutte = new ArrayList<>();
         String SQL = "SELECT * FROM Prenotazione ORDER BY Data DESC, Orario ASC;";
