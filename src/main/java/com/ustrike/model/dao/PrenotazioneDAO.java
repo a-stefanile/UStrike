@@ -8,12 +8,12 @@ import java.util.List;
 
 public class PrenotazioneDAO {
 
-    public void insertPrenotazione(Timestamp data, Timestamp orario, String stato, 
+    public int insertPrenotazione(Timestamp data, Timestamp orario, String stato, 
                                    String partecipanti, int idServizio, int idRisorsa, 
                                    int idCliente, Integer idStaff) throws SQLException {
         String SQL = "INSERT INTO Prenotazione (Data, Orario, StatoPrenotazione, Partecipanti, IDServizio, IDRisorsa, IDCliente, IDStaff) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
             ps.setTimestamp(1, data);
             ps.setTimestamp(2, orario);
             ps.setString(3, stato);
@@ -26,7 +26,15 @@ public class PrenotazioneDAO {
             } else {
                 ps.setNull(8, Types.INTEGER);
             }
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);  // ID nuova prenotazione
+                    }
+                }
+            }
+            return -1;
         }
     }
 
@@ -35,9 +43,10 @@ public class PrenotazioneDAO {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, idPrenotazione);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapResultSetToPrenotazione(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToPrenotazione(rs);
+                }
             }
         }
         return null;
@@ -47,9 +56,8 @@ public class PrenotazioneDAO {
         List<Prenotazione> prenotazioni = new ArrayList<>();
         String SQL = "SELECT * FROM Prenotazione WHERE IDCliente = ? ORDER BY Orario DESC;";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setInt(1, idCliente);
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = connection.prepareStatement(SQL);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 prenotazioni.add(mapResultSetToPrenotazione(rs));
             }
@@ -61,8 +69,8 @@ public class PrenotazioneDAO {
         List<Prenotazione> prenotazioni = new ArrayList<>();
         String SQL = "SELECT * FROM Prenotazione WHERE StatoPrenotazione = 'In attesa' ORDER BY Orario ASC;";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = connection.prepareStatement(SQL);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 prenotazioni.add(mapResultSetToPrenotazione(rs));
             }
@@ -76,9 +84,10 @@ public class PrenotazioneDAO {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, idServizio);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                prenotazioni.add(mapResultSetToPrenotazione(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    prenotazioni.add(mapResultSetToPrenotazione(rs));
+                }
             }
         }
         return prenotazioni;
@@ -108,26 +117,12 @@ public class PrenotazioneDAO {
         }
     }
 
-    private Prenotazione mapResultSetToPrenotazione(ResultSet rs) throws SQLException {
-        return new Prenotazione(
-            rs.getInt("IDPrenotazione"),
-            rs.getTimestamp("Data"),
-            rs.getTimestamp("Orario"),
-            rs.getString("StatoPrenotazione"),
-            rs.getString("Partecipanti"),
-            rs.getInt("IDServizio"),
-            rs.getInt("IDRisorsa"),
-            rs.getInt("IDCliente"),
-            rs.getObject("IDStaff") != null ? rs.getInt("IDStaff") : null
-        );
-    }
-    
     public List<Prenotazione> selectPrenotazioniCompletate() throws SQLException {
         List<Prenotazione> prenotazioni = new ArrayList<>();
         String SQL = "SELECT * FROM Prenotazione WHERE StatoPrenotazione IN ('Confermata', 'Rifiutata') ORDER BY Orario DESC;";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = connection.prepareStatement(SQL);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 prenotazioni.add(mapResultSetToPrenotazione(rs));
             }
@@ -141,11 +136,24 @@ public class PrenotazioneDAO {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQL);
              ResultSet rs = ps.executeQuery()) {
-            
             while (rs.next()) {
                 tutte.add(mapResultSetToPrenotazione(rs));
             }
         }
         return tutte;
+    }
+
+    private Prenotazione mapResultSetToPrenotazione(ResultSet rs) throws SQLException {
+        return new Prenotazione(
+            rs.getInt("IDPrenotazione"),
+            rs.getTimestamp("Data"),
+            rs.getTimestamp("Orario"),
+            rs.getString("StatoPrenotazione"),
+            rs.getString("Partecipanti"),
+            rs.getInt("IDServizio"),
+            rs.getInt("IDRisorsa"),
+            rs.getInt("IDCliente"),
+            rs.getObject("IDStaff") != null ? rs.getInt("IDStaff") : null
+        );
     }
 }
