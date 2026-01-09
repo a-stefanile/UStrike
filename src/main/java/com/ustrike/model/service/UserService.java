@@ -11,57 +11,56 @@ public class UserService {
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final StaffDAO staffDAO = new StaffDAO();
     
-   
+    // 🔐 LOGIN UNIFICATO (PBKDF2 salt:hash)
     public Object authenticateUser(String email, String passwordPlain) throws SQLException {
-        // 1. Cliente
+        // 1. CLIENTE UC2
         Cliente cliente = clienteDAO.selectClienteByEmail(email);
         if (cliente != null && PasswordHasher.verify(passwordPlain, cliente.getPasswordHash())) {
             return new Object[]{"cliente", cliente.getIDCliente(), cliente.getNomeCliente()};
         }
         
-        // 2. Staff
+        // 2. STAFF UC21
         Staff staff = staffDAO.doRetrieveByEmail(email);
-        if (staff != null && PasswordHasher.verify(passwordPlain, staff.getPassword())) {
+        if (staff != null && PasswordHasher.verify(passwordPlain, staff.getPasswordHash())) {
             return new Object[]{"staff", staff.getIDStaff(), staff.getNomeStaff()};
         }
         
-        return null; 
+        return null;  // Login fallito
     }
     
-    
-    public boolean createUser(Cliente cliente) throws SQLException {
-        // Pre-cond: email unica (ODD)
+    // ➕ REGISTRAZIONE CLIENTE UC1
+    public boolean createCliente(Cliente cliente, String passwordPlain) throws SQLException {
+        // Email unica ODD
         if (clienteDAO.selectClienteByEmail(cliente.getEmail()) != null) {
             return false;
         }
         
-        
-        cliente.setPasswordHash(PasswordHasher.hash(cliente.getPasswordHash()));
+        cliente.setPasswordHash(PasswordHasher.hash(passwordPlain));  // ✅ PBKDF2 salt:hash
         cliente.setPuntiTicket(0);
-        
         return clienteDAO.insertCliente(cliente);
     }
     
-   
-    public boolean createStaff(Staff staff) throws SQLException {
+    // ➕ STAFF (admin)
+    public boolean createStaff(Staff staff, String passwordPlain) throws SQLException {
         if (staffDAO.emailExists(staff.getEmail())) {
             return false;
         }
-        staff.setPassword(PasswordHasher.hash(staff.getPassword()));
+        staff.setPasswordHash(PasswordHasher.hash(passwordPlain));  // ✅ Uniforme
         return staffDAO.doSave(staff);
     }
     
-    
+    // ✏️ UPDATE PROFILO
     public boolean updateUser(Object user, String ruolo) throws SQLException {
         if ("cliente".equalsIgnoreCase(ruolo) && user instanceof Cliente) {
-            return clienteDAO.updateCliente((Cliente) user);
+            Cliente c = (Cliente) user;
+            return clienteDAO.updateCliente(c);
         } else if ("staff".equalsIgnoreCase(ruolo) && user instanceof Staff) {
             return staffDAO.doUpdate((Staff) user);
         }
         return false;
     }
     
-    
+    // 🔑 CHANGE PASSWORD (verifica old)
     public boolean changePassword(String email, String ruolo, String oldPlain, String newPlain) 
             throws SQLException {
         
@@ -72,30 +71,19 @@ public class UserService {
             }
         } else if ("staff".equalsIgnoreCase(ruolo)) {
             Staff s = staffDAO.doRetrieveByEmail(email);
-            if (s != null && PasswordHasher.verify(oldPlain, s.getPassword())) {
+            if (s != null && PasswordHasher.verify(oldPlain, s.getPasswordHash())) {
                 return staffDAO.updatePassword(s.getIDStaff(), PasswordHasher.hash(newPlain));
             }
         }
         return false;
     }
     
-   
+    // 👤 GET BY ID
     public Object getUserById(int id, String ruolo) throws SQLException {
         if ("cliente".equalsIgnoreCase(ruolo)) {
-            Cliente c = clienteDAO.selectClienteById(id);
-            return c;
+            return clienteDAO.selectClienteById(id);
         } else if ("staff".equalsIgnoreCase(ruolo)) {
-            Staff s = staffDAO.doRetrieveByKey(id);
-            return s;
-        }
-        return null;
-    }
-    
-    public String getUserRole(int id, String tipo) throws SQLException {
-        if ("cliente".equalsIgnoreCase(tipo)) {
-            return clienteDAO.selectClienteById(id) != null ? "cliente" : null;
-        } else if ("staff".equalsIgnoreCase(tipo)) {
-            return staffDAO.doRetrieveByKey(id) != null ? "staff" : null;
+            return staffDAO.doRetrieveByKey(id);
         }
         return null;
     }

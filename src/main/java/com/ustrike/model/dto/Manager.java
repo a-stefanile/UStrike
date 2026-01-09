@@ -9,20 +9,22 @@ public class Manager implements Serializable {
     private String nomeManager;
     private String cognomeManager;
     private String email;
-    private String password;
+    private String passwordHash;  
+    private String ruoloManager;  
 
     public Manager() {}
     
     public Manager(int idManager, String nomeManager, String cognomeManager, 
-                   String email, String password) {
+                   String email, String passwordHash, String ruoloManager) {
         this.idManager = idManager;
         this.nomeManager = nomeManager;
         this.cognomeManager = cognomeManager;
         this.email = email;
-        this.password = password;
+        this.passwordHash = passwordHash;
+        this.ruoloManager = ruoloManager;
     }
 
-    // Getter e Setter
+    // Getters/Setters
     public int getIDManager() { return idManager; }
     public void setIDManager(int idManager) { this.idManager = idManager; }
     
@@ -35,6 +37,14 @@ public class Manager implements Serializable {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    
+    public String getRuoloManager() { return ruoloManager; }
+    public void setRuoloManager(String ruoloManager) { this.ruoloManager = ruoloManager; }
+    
+    
+    public String getFullName() { 
+        return nomeManager + " " + cognomeManager; 
+    }
 }

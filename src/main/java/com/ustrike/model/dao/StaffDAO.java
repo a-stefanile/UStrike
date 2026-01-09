@@ -13,14 +13,14 @@ import java.util.Base64;
 public class StaffDAO {
 
     // CREATE
-    // Prima di chiamare questo, puoi usare emailExists(email) per gestire "email già usata"
+    
     public boolean doSave(Staff staff) {
         String sql = "INSERT INTO Staff (NomeStaff, CognomeStaff, Email, Password, Ruolo) " +
                      "VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            String hashedPassword = hashPassword(staff.getPassword());
+            String hashedPassword = hashPassword(staff.getPasswordHash());
 
             stmt.setString(1, staff.getNomeStaff());
             stmt.setString(2, staff.getCognomeStaff());
@@ -51,7 +51,7 @@ public class StaffDAO {
                 s.setNomeStaff(rs.getString("NomeStaff"));
                 s.setCognomeStaff(rs.getString("CognomeStaff"));
                 s.setEmail(rs.getString("Email"));
-                s.setPassword(rs.getString("Password"));
+                s.setPasswordHash(rs.getString("Password"));
                 s.setRuolo(rs.getString("Ruolo"));
                 return s;
             }
@@ -80,7 +80,7 @@ public class StaffDAO {
                 s.setNomeStaff(rs.getString("NomeStaff"));
                 s.setCognomeStaff(rs.getString("CognomeStaff"));
                 s.setEmail(rs.getString("Email"));
-                s.setPassword(rs.getString("Password"));
+                s.setPasswordHash(rs.getString("Password"));
                 s.setRuolo(rs.getString("Ruolo"));
             }
 
@@ -150,7 +150,7 @@ public class StaffDAO {
                 s.setNomeStaff(rs.getString("NomeStaff"));
                 s.setCognomeStaff(rs.getString("CognomeStaff"));
                 s.setEmail(rs.getString("Email"));
-                s.setPassword(rs.getString("Password"));
+                s.setPasswordHash(rs.getString("Password"));
                 s.setRuolo(rs.getString("Ruolo"));
                 lista.add(s);
             }
@@ -178,7 +178,7 @@ public class StaffDAO {
                 s.setNomeStaff(rs.getString("NomeStaff"));
                 s.setCognomeStaff(rs.getString("CognomeStaff"));
                 s.setEmail(rs.getString("Email"));
-                s.setPassword(rs.getString("Password"));
+                s.setPasswordHash(rs.getString("Password"));
                 s.setRuolo(rs.getString("Ruolo"));
                 lista.add(s);
             }
@@ -199,7 +199,7 @@ public class StaffDAO {
             stmt.setString(1, staff.getNomeStaff());
             stmt.setString(2, staff.getCognomeStaff());
             stmt.setString(3, staff.getEmail());
-            stmt.setString(4, staff.getPassword()); // passa già hashata o gestisci hash qui
+            stmt.setString(4, staff.getPasswordHash()); // passa già hashata o gestisci hash qui
             stmt.setString(5, staff.getRuolo());
             stmt.setInt(6, staff.getIDStaff());
 

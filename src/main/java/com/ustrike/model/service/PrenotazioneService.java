@@ -9,16 +9,16 @@ import java.util.List;
 public class PrenotazioneService {
     private final PrenotazioneDAO dao = new PrenotazioneDAO();
 
-    // CATALOGO STAFF (In Attesa)
+    
     public List<Prenotazione> getCatalogoInAttesa() {
         try {
             return dao.selectPrenotazioniInAttesa();
         } catch (Exception e) {
-            throw new RuntimeException("Errore catalogo", e);
+            throw new RuntimeException("Errore catalogo in attesa", e);
         }
     }
 
-    //  CLIENTE (cache + DAO)
+    
     public List<Prenotazione> getPrenotazioniCliente(int idCliente, HttpSession session) {
         if (session != null) {
             String cacheKey = "prenotazioni_" + idCliente;
@@ -38,30 +38,45 @@ public class PrenotazioneService {
         }
     }
 
-    // ➕ CREA PRENOTAZIONE
-    public void creaPrenotazione(Timestamp data, Timestamp orario, String partecipanti, 
-                                int idServizio, int idRisorsa, int idCliente) {
+    
+    public int creaPrenotazione(Timestamp data, Timestamp orario, String partecipanti, 
+                                int idServizio, int idRisorsa, int idCliente, HttpSession session) {
         try {
-            dao.insertPrenotazione(data, orario, "In attesa", partecipanti, 
-                                 idServizio, idRisorsa, idCliente, null);
+            int id = dao.insertPrenotazione(data, orario, "In attesa", partecipanti, 
+                                          idServizio, idRisorsa, idCliente, null);
+            if (session != null) {
+                session.removeAttribute("prenotazioni_" + idCliente);  // ✅ Invalidate cache
+            }
+            return id;  // 
         } catch (Exception e) {
-            throw new RuntimeException("Errore creazione", e);
+            throw new RuntimeException("Errore creazione prenotazione", e);
         }
     }
 
     // STAFF ACCETTA
-    public boolean accettaPrenotazione(int idPrenotazione, int idStaff) {
+    public boolean accettaPrenotazione(int idPrenotazione, int idStaff, HttpSession session) {
         try {
-            return dao.updateStatoPrenotazione(idPrenotazione, "Confermata", idStaff);
+            boolean ok = dao.updateStatoPrenotazione(idPrenotazione, "Confermata", idStaff);
+            if (ok && session != null) {
+                // Invalidate cliente cache
+                Prenotazione p = dao.selectPrenotazione(idPrenotazione);
+                if (p != null) session.removeAttribute("prenotazioni_" + p.getIDCliente());
+            }
+            return ok;
         } catch (Exception e) {
             throw new RuntimeException("Errore accettazione", e);
         }
     }
 
-    // STAFF RIFIUTA
-    public boolean rifiutaPrenotazione(int idPrenotazione, int idStaff, String motivo) {
+    
+    public boolean rifiutaPrenotazione(int idPrenotazione, int idStaff, HttpSession session) {
         try {
-            return dao.updateStatoPrenotazione(idPrenotazione, "Rifiutata", idStaff);
+            boolean ok = dao.updateStatoPrenotazione(idPrenotazione, "Rifiutata", idStaff);
+            if (ok && session != null) {
+                Prenotazione p = dao.selectPrenotazione(idPrenotazione);
+                if (p != null) session.removeAttribute("prenotazioni_" + p.getIDCliente());
+            }
+            return ok;
         } catch (Exception e) {
             throw new RuntimeException("Errore rifiuto", e);
         }
@@ -75,8 +90,12 @@ public class PrenotazioneService {
         }
     }
 
-    // TEST STANDALONE (senza session/singleton)
-    public List<Prenotazione> getCatalogoTest() throws Exception {
-        return dao.selectPrenotazioniInAttesa();
+    public List<Prenotazione> getCatalogoAll() {
+        try {
+            return dao.selectAllPrenotazioni();
+        } catch (Exception e) {
+            throw new RuntimeException("Errore catalogo all", e);
+        }
     }
+
 }

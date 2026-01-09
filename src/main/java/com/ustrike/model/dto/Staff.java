@@ -9,22 +9,22 @@ public class Staff implements Serializable {
     private String nomeStaff;
     private String cognomeStaff;
     private String email;
-    private String password;
-    private String ruolo;  
+    private String passwordHash;  
+    private String ruolo;         
 
     public Staff() {}
     
     public Staff(int idStaff, String nomeStaff, String cognomeStaff, 
-                 String email, String password, String ruolo) {
+                 String email, String passwordHash, String ruolo) {
         this.idStaff = idStaff;
         this.nomeStaff = nomeStaff;
         this.cognomeStaff = cognomeStaff;
         this.email = email;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.ruolo = ruolo;
     }
 
-    // Getter e Setter
+    // Getters/Setters
     public int getIDStaff() { return idStaff; }
     public void setIDStaff(int idStaff) { this.idStaff = idStaff; }
     
@@ -37,9 +37,16 @@ public class Staff implements Serializable {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     
     public String getRuolo() { return ruolo; }
     public void setRuolo(String ruolo) { this.ruolo = ruolo; }
-}
+    
+    
+    public String getFullName() { 
+        return nomeStaff + " " + cognomeStaff; 
+    }
+    
+    
+  }
