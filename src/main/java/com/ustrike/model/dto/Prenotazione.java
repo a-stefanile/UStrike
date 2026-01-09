@@ -6,37 +6,33 @@ import java.sql.Timestamp;
 public class Prenotazione implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int idPrenotazione;
-    private Timestamp data;              
-    private Timestamp orario;            
-    private String statoPrenotazione;    
-    private String partecipanti;         
-    private int idServizio;              
-    private int idRisorsa;               
-    private int idCliente;
-    private Integer idStaff;             
+    private int IDPrenotazione;
+    private Timestamp data;
+    private Timestamp orario;
+    private String statoPrenotazione;
+    private String partecipanti;
+    private int IDServizio;
+    private int IDRisorsa;
+    private int IDCliente;
+    private Integer IDStaff;
 
-    
     public Prenotazione() {}
 
-    
-    public Prenotazione(int idPrenotazione, Timestamp data, Timestamp orario,
-                       String statoPrenotazione, String partecipanti,
-                       int idServizio, int idRisorsa, int idCliente, Integer idStaff) {
-        this.idPrenotazione = idPrenotazione;
+    public Prenotazione(int IDPrenotazione, Timestamp data, Timestamp orario, String statoPrenotazione,
+                        String partecipanti, int IDServizio, int IDRisorsa, int IDCliente, Integer IDStaff) {
+        this.IDPrenotazione = IDPrenotazione;
         this.data = data;
         this.orario = orario;
         this.statoPrenotazione = statoPrenotazione;
         this.partecipanti = partecipanti;
-        this.idServizio = idServizio;
-        this.idRisorsa = idRisorsa;
-        this.idCliente = idCliente;
-        this.idStaff = idStaff;
+        this.IDServizio = IDServizio;
+        this.IDRisorsa = IDRisorsa;
+        this.IDCliente = IDCliente;
+        this.IDStaff = IDStaff;
     }
 
-    // Getter e Setter
-    public int getIDPrenotazione() { return idPrenotazione; }
-    public void setIDPrenotazione(int idPrenotazione) { this.idPrenotazione = idPrenotazione; }
+    public int getIDPrenotazione() { return IDPrenotazione; }
+    public void setIDPrenotazione(int iDPrenotazione) { IDPrenotazione = iDPrenotazione; }
 
     public Timestamp getData() { return data; }
     public void setData(Timestamp data) { this.data = data; }
@@ -50,30 +46,15 @@ public class Prenotazione implements Serializable {
     public String getPartecipanti() { return partecipanti; }
     public void setPartecipanti(String partecipanti) { this.partecipanti = partecipanti; }
 
-    public int getIDServizio() { return idServizio; }
-    public void setIDServizio(int idServizio) { this.idServizio = idServizio; }
+    public int getIDServizio() { return IDServizio; }
+    public void setIDServizio(int iDServizio) { IDServizio = iDServizio; }
 
-    public int getIDRisorsa() { return idRisorsa; }
-    public void setIDRisorsa(int idRisorsa) { this.idRisorsa = idRisorsa; }
+    public int getIDRisorsa() { return IDRisorsa; }
+    public void setIDRisorsa(int iDRisorsa) { IDRisorsa = iDRisorsa; }
 
-    public int getIDCliente() { return idCliente; }
-    public void setIDCliente(int idCliente) { this.idCliente = idCliente; }
+    public int getIDCliente() { return IDCliente; }
+    public void setIDCliente(int iDCliente) { IDCliente = iDCliente; }
 
-    public Integer getIDStaff() { return idStaff; }
-    public void setIDStaff(Integer idStaff) { this.idStaff = idStaff; }
-
-    @Override
-    public String toString() {
-        return "Prenotazione{" +
-                "IDPrenotazione=" + idPrenotazione +
-                ", Data=" + data +
-                ", Orario=" + orario +
-                ", Stato='" + statoPrenotazione + '\'' +
-                ", Partecipanti='" + partecipanti + '\'' +
-                ", IDServizio=" + idServizio +
-                ", IDRisorsa=" + idRisorsa +
-                ", IDCliente=" + idCliente +
-                ", IDStaff=" + idStaff +
-                '}';
-    }
+    public Integer getIDStaff() { return IDStaff; }
+    public void setIDStaff(Integer iDStaff) { IDStaff = iDStaff; }
 }
