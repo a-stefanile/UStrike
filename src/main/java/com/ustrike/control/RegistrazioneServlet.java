@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 public class RegistrazioneServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String VIEW_REGISTER = "/jsp/register.jsp";
-    private static final String VIEW_LOGIN    = "/jsp/login.jsp";
+    private static final String VIEW_REGISTER = "/view/jsp/register.jsp";
+    private static final String VIEW_LOGIN    = "/view/jsp/login.jsp";
 
     // Password: >=8, maiusc, minusc, numero, speciali 
     private static final Pattern PASSWORD_PATTERN =
@@ -55,7 +55,7 @@ public class RegistrazioneServlet extends HttpServlet {
         if (!EMAIL_PATTERN.matcher(email).matches())
                                               errors.append("Email non valida. ");
         if (password == null || !PASSWORD_PATTERN.matcher(password).matches())
-                                              errors.append("Password: 8+ char, maiusc/minusc/numero. ");
+                                              errors.append("Password: deve avere almeno 8 caratteri di cui almeno: 1 maiusc/1 minusc/1 numero. ");
         if (!password.equals(confPassword))     errors.append("Password non corrispondono. ");
 
         if (errors.length() > 0) {

@@ -2,249 +2,150 @@ package com.ustrike.model.dao;
 
 import com.ustrike.model.dto.Staff;
 import com.ustrike.util.DBConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Base64;
 
 public class StaffDAO {
 
-    // CREATE
-    
-    public boolean doSave(Staff staff) {
-        String sql = "INSERT INTO Staff (NomeStaff, CognomeStaff, Email, Password, Ruolo) " +
-                     "VALUES (?, ?, ?, ?, ?)";
+    public boolean doSave(Staff staff) throws SQLException {
+        String sql = "INSERT INTO Staff (NomeStaff, CognomeStaff, Email, PasswordHash, Ruolo) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            String hashedPassword = hashPassword(staff.getPasswordHash());
+            ps.setString(1, staff.getNomeStaff());
+            ps.setString(2, staff.getCognomeStaff());
+            ps.setString(3, staff.getEmail());
+            ps.setString(4, staff.getPasswordHash()); // già hashata (PBKDF2 salt:hash)
+            ps.setString(5, staff.getRuolo());
 
-            stmt.setString(1, staff.getNomeStaff());
-            stmt.setString(2, staff.getCognomeStaff());
-            stmt.setString(3, staff.getEmail());
-            stmt.setString(4, hashedPassword);
-            stmt.setString(5, staff.getRuolo()); // 'Bowling' o 'GoKart'
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) staff.setIDStaff(rs.getInt(1));
+                }
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
-    // READ by PK
-    public Staff doRetrieveByKey(int idStaff) {
+    public Staff doRetrieveByKey(int idStaff) throws SQLException {
         String sql = "SELECT * FROM Staff WHERE IDStaff = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, idStaff);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                Staff s = new Staff();
-                s.setIDStaff(rs.getInt("IDStaff"));
-                s.setNomeStaff(rs.getString("NomeStaff"));
-                s.setCognomeStaff(rs.getString("CognomeStaff"));
-                s.setEmail(rs.getString("Email"));
-                s.setPasswordHash(rs.getString("Password"));
-                s.setRuolo(rs.getString("Ruolo"));
-                return s;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // READ by email
-    public Staff doRetrieveByEmail(String email) {
-        if (email == null) return null;
-        Staff s = null;
-        String sql = "SELECT * FROM Staff WHERE Email = ? LIMIT 1";
-
-        try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
+            ps.setInt(1, idStaff);
 
-            if (rs.next()) {
-                s = new Staff();
-                s.setIDStaff(rs.getInt("IDStaff"));
-                s.setNomeStaff(rs.getString("NomeStaff"));
-                s.setCognomeStaff(rs.getString("CognomeStaff"));
-                s.setEmail(rs.getString("Email"));
-                s.setPasswordHash(rs.getString("Password"));
-                s.setRuolo(rs.getString("Ruolo"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return s;
-    }
-
-    // CHECK: esiste già una riga con questa email?
-    public boolean emailExists(String email) {
-        if (email == null) return false;
-        String sql = "SELECT 1 FROM Staff WHERE Email = ? LIMIT 1";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next(); // true se c'è almeno una riga
+                return rs.next() ? mapResultSetToStaff(rs) : null;
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return false;
     }
 
-    // LOGIN staff
-    public Staff doRetrieveByCredentials(String email, String password) {
-        String sql = "SELECT * FROM Staff WHERE Email = ? AND Password = ?";
+    public Staff doRetrieveByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM Staff WHERE Email = ? LIMIT 1";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, hashPassword(password));
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Staff s = new Staff();
-                s.setIDStaff(rs.getInt("IDStaff"));
-                s.setNomeStaff(rs.getString("NomeStaff"));
-                s.setCognomeStaff(rs.getString("CognomeStaff"));
-                s.setEmail(rs.getString("Email"));
-                s.setRuolo(rs.getString("Ruolo"));
-                return s;
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapResultSetToStaff(rs) : null;
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return null;
     }
 
-    // LIST di tutto lo staff
-    public List<Staff> doRetrieveAll() {
-        List<Staff> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Staff";
-
+    public boolean emailExists(String email) throws SQLException {
+        String sql = "SELECT 1 FROM Staff WHERE Email = ? LIMIT 1";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public List<Staff> doRetrieveAll() throws SQLException {
+        List<Staff> lista = new ArrayList<>();
+        String sql = "SELECT * FROM Staff ORDER BY CognomeStaff, NomeStaff";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Staff s = new Staff();
-                s.setIDStaff(rs.getInt("IDStaff"));
-                s.setNomeStaff(rs.getString("NomeStaff"));
-                s.setCognomeStaff(rs.getString("CognomeStaff"));
-                s.setEmail(rs.getString("Email"));
-                s.setPasswordHash(rs.getString("Password"));
-                s.setRuolo(rs.getString("Ruolo"));
-                lista.add(s);
+                lista.add(mapResultSetToStaff(rs));
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return lista;
     }
 
-    // LIST filtrata per ruolo ('Bowling' / 'GoKart')
-    public List<Staff> doRetrieveByRuolo(String ruolo) {
+    public List<Staff> doRetrieveByRuolo(String ruolo) throws SQLException {
         List<Staff> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Staff WHERE Ruolo = ?";
-
+        String sql = "SELECT * FROM Staff WHERE Ruolo = ? ORDER BY CognomeStaff, NomeStaff";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, ruolo);
-            ResultSet rs = stmt.executeQuery();
+            ps.setString(1, ruolo);
 
-            while (rs.next()) {
-                Staff s = new Staff();
-                s.setIDStaff(rs.getInt("IDStaff"));
-                s.setNomeStaff(rs.getString("NomeStaff"));
-                s.setCognomeStaff(rs.getString("CognomeStaff"));
-                s.setEmail(rs.getString("Email"));
-                s.setPasswordHash(rs.getString("Password"));
-                s.setRuolo(rs.getString("Ruolo"));
-                lista.add(s);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapResultSetToStaff(rs));
+                }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return lista;
     }
 
-    // UPDATE
-    public boolean doUpdate(Staff staff) {
-        String sql = "UPDATE Staff SET NomeStaff=?, CognomeStaff=?, Email=?, Password=?, Ruolo=? " +
-                     "WHERE IDStaff=?";
+    public boolean doUpdate(Staff staff) throws SQLException {
+        String sql = "UPDATE Staff SET NomeStaff=?, CognomeStaff=?, Email=?, PasswordHash=?, Ruolo=? WHERE IDStaff=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, staff.getNomeStaff());
-            stmt.setString(2, staff.getCognomeStaff());
-            stmt.setString(3, staff.getEmail());
-            stmt.setString(4, staff.getPasswordHash()); // passa già hashata o gestisci hash qui
-            stmt.setString(5, staff.getRuolo());
-            stmt.setInt(6, staff.getIDStaff());
+            ps.setString(1, staff.getNomeStaff());
+            ps.setString(2, staff.getCognomeStaff());
+            ps.setString(3, staff.getEmail());
+            ps.setString(4, staff.getPasswordHash()); // già hashata
+            ps.setString(5, staff.getRuolo());
+            ps.setInt(6, staff.getIDStaff());
 
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // DELETE by id
-    public boolean doDelete(int idStaff) {
-        String sql = "DELETE FROM Staff WHERE IDStaff = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, idStaff);
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // DELETE by DTO
-    public boolean doDelete(Staff staff) {
-        return doDelete(staff.getIDStaff());
-    }
-
-    // hashing password
-    private String hashPassword(String password) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(bytes);
-    }
-    
-    public boolean updatePassword(int idStaff, String newPasswordHash) throws SQLException {
-        String SQL = "UPDATE Staff SET Password = ? WHERE IDStaff = ?;";
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setString(1, newPasswordHash);
-            ps.setInt(2, idStaff);
             return ps.executeUpdate() > 0;
         }
+    }
+
+    public boolean updatePassword(int idStaff, String newPasswordHash) throws SQLException {
+        String sql = "UPDATE Staff SET PasswordHash = ? WHERE IDStaff = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newPasswordHash);
+            ps.setInt(2, idStaff);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean doDelete(int idStaff) throws SQLException {
+        String sql = "DELETE FROM Staff WHERE IDStaff = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idStaff);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    private Staff mapResultSetToStaff(ResultSet rs) throws SQLException {
+        Staff s = new Staff();
+        s.setIDStaff(rs.getInt("IDStaff"));
+        s.setNomeStaff(rs.getString("NomeStaff"));
+        s.setCognomeStaff(rs.getString("CognomeStaff"));
+        s.setEmail(rs.getString("Email"));
+        s.setPasswordHash(rs.getString("PasswordHash"));
+        s.setRuolo(rs.getString("Ruolo"));
+        return s;
     }
 }
