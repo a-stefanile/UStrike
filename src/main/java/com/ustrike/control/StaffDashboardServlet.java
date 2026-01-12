@@ -45,7 +45,7 @@ public class StaffDashboardServlet extends HttpServlet {
 
         request.setAttribute("prenotazioni", prenotazioni);
         request.setAttribute("filter", filter);
-        request.getRequestDispatcher("/staff/catalogo-prenotazioni.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/jsp/catalogo-prenotazioni.jsp").forward(request, response);
     }
 
     @Override
