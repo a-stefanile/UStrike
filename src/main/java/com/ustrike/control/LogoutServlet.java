@@ -13,12 +13,9 @@ import java.io.IOException;
 public class LogoutServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String VIEW_INDEX = "/index.jsp";  // O /login.jsp se preferisci
+    private static final String VIEW_INDEX = "/login";  
 
-    /**
-     * PRE: Sessione esistente (o no) → POST: Sessione invalidata + redirect index
-     * Invariante: Logout SEMPRE possibile, anche da stato inconsistente
-     */
+   
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -37,7 +34,7 @@ public class LogoutServlet extends HttpServlet {
         HttpSession session = request.getSession(false);  // Non crea se non esiste
         
         if (session != null) {
-            // 🔒 Log per audit (compatibile col tuo filtro)
+            // Log per audit (compatibile col tuo filtro)
             String ruolo = (String) session.getAttribute("ruolo");
             String nome = (String) session.getAttribute("nomeUtente");
             Integer userId = (Integer) session.getAttribute("userId");
@@ -48,11 +45,11 @@ public class LogoutServlet extends HttpServlet {
                             ruolo != null ? ruolo : "nessuno",
                             new java.util.Date());
             
-            // 🧹 Pulizia TOTALE sessione (post-cond: nessun dato residuo)
+            //  Pulizia TOTALE sessione (post-cond: nessun dato residuo)
             session.invalidate();
         }
         
-        // 🚀 Redirect index (post-cond)
+        // Redirect index (post-cond)
         response.sendRedirect(request.getContextPath() + VIEW_INDEX);
     }
 }

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
@@ -26,7 +27,7 @@ public class CreaPrenotazioneServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setAttribute("servizi", servizioService.getServiziAbilitati());
-        request.getRequestDispatcher("/cliente/prenotazioni-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/jsp/prenotazioni-form.jsp").forward(request, response);
     }
 
     @Override
@@ -48,38 +49,55 @@ public class CreaPrenotazioneServlet extends HttpServlet {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
 
-        try {
-            String data = request.getParameter("data");        // es: 2026-01-10
-            String orario = request.getParameter("orario");    // es: 19:30
+        try (PrintWriter out = response.getWriter()) {
+            String data = request.getParameter("data");        // YYYY-MM-DD
+            String orario = request.getParameter("orario");    // HH:00
             String partecipanti = request.getParameter("partecipanti");
             String idServizioStr = request.getParameter("idServizio");
             String idRisorsaStr = request.getParameter("idRisorsa");
 
-            if (data == null || orario == null || idServizioStr == null || idRisorsaStr == null) {
+            if (isBlank(data) || isBlank(orario) || isBlank(idServizioStr) || isBlank(idRisorsaStr)) {
                 out.print("{\"success\":false,\"error\":\"Parametri mancanti\"}");
                 return;
             }
-            if (partecipanti == null || partecipanti.trim().isEmpty()) {
+            if (isBlank(partecipanti)) {
                 out.print("{\"success\":false,\"error\":\"Partecipanti richiesti\"}");
                 return;
             }
 
-            int idServizio = Integer.parseInt(idServizioStr.trim());
-            int idRisorsa = Integer.parseInt(idRisorsaStr.trim());
+            // Fasce orarie: HH:00
+            String fascia = orario.trim();
+            if (!fascia.matches("^([01]\\d|2[0-3]):00$")) {
+                out.print("{\"success\":false,\"error\":\"Orario non valido (solo fasce HH:00)\"}");
+                return;
+            }
 
-            // Coerente col tuo DB: Data = solo giorno, Orario = timestamp completo giorno+ora
-            Timestamp tsData = Timestamp.valueOf(data.trim() + " 00:00:00");
-            Timestamp tsOrario = Timestamp.valueOf(data.trim() + " " + orario.trim() + ":00");
+            int idServizio;
+            int idRisorsa;
+            try {
+                idServizio = Integer.parseInt(idServizioStr.trim());
+                idRisorsa = Integer.parseInt(idRisorsaStr.trim());
+            } catch (NumberFormatException e) {
+                out.print("{\"success\":false,\"error\":\"Dati numerici non validi\"}");
+                return;
+            }
 
-            // Controllo disponibilità risorsa per quell'orario
+            Timestamp tsData;
+            Timestamp tsOrario;
+            try {
+                tsData = Timestamp.valueOf(data.trim() + " 00:00:00");
+                tsOrario = Timestamp.valueOf(data.trim() + " " + fascia + ":00");
+            } catch (IllegalArgumentException e) {
+                out.print("{\"success\":false,\"error\":\"Data/orario non validi\"}");
+                return;
+            }
+
             if (!risorsaService.isRisorsaDisponibile(idRisorsa, tsOrario)) {
                 out.print("{\"success\":false,\"error\":\"Risorsa non disponibile\"}");
                 return;
             }
 
-            // Il tuo service invalida la cache "prenotazioni_{idCliente}" nella session
             int idPrenotazione = prenotazioneService.creaPrenotazione(
                     tsData, tsOrario, partecipanti.trim(),
                     idServizio, idRisorsa, userId, session
@@ -90,16 +108,15 @@ public class CreaPrenotazioneServlet extends HttpServlet {
                 return;
             }
 
-            out.print("{\"success\":true,\"idPrenotazione\":" + idPrenotazione + "}");
-        } catch (NumberFormatException e) {
-            out.print("{\"success\":false,\"error\":\"Dati numerici non validi\"}");
-        } catch (IllegalArgumentException e) {
-            // Timestamp.valueOf() lancia IllegalArgumentException se formato errato
-            out.print("{\"success\":false,\"error\":\"Data/orario non validi\"}");
-        } catch (Exception e) {
-            out.print("{\"success\":false,\"error\":\"Errore server\"}");
-        } finally {
-            out.flush();
+            // SOLUZIONE 1: messaggio in risposta
+            out.print("{\"success\":true,"
+                    + "\"idPrenotazione\":" + idPrenotazione + ","
+                    + "\"message\":\"Richiesta inviata con successo. Attendi la conferma del nostro staff.\""
+                    + "}");
         }
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 }

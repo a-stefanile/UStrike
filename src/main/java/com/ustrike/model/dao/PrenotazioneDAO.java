@@ -1,6 +1,7 @@
 package com.ustrike.model.dao;
 
 import com.ustrike.model.dto.Prenotazione;
+import com.ustrike.model.dto.PrenotazioneView;
 import com.ustrike.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
@@ -141,4 +142,50 @@ public class PrenotazioneDAO {
                 idStaff
         );
     }
+    
+    public List<PrenotazioneView> selectPrenotazioniByClienteView(int idCliente) throws Exception {
+        List<PrenotazioneView> list = new ArrayList<>();
+
+        String sql =
+            "SELECT p.IDPrenotazione, p.Data, p.Orario, p.StatoPrenotazione, p.Partecipanti, " +
+            "       p.IDServizio, s.NomeServizio, " +
+            "       p.IDRisorsa, r.Capacita AS CapacitaRisorsa, " +
+            "       p.IDStaff " +
+            "FROM Prenotazione p " +
+            "INNER JOIN Servizio s ON s.IDServizio = p.IDServizio " +
+            "INNER JOIN Risorsa  r ON r.IDRisorsa  = p.IDRisorsa " +
+            "WHERE p.IDCliente = ? " +
+            "ORDER BY p.Orario DESC";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idCliente);
+
+            try (ResultSet rs = ps.executeQuery()) { // executeQuery per SELECT [web:426]
+                while (rs.next()) {
+                    PrenotazioneView v = new PrenotazioneView();
+                    v.setIDPrenotazione(rs.getInt("IDPrenotazione"));
+                    v.setData(rs.getTimestamp("Data"));
+                    v.setOrario(rs.getTimestamp("Orario"));
+                    v.setStatoPrenotazione(rs.getString("StatoPrenotazione"));
+                    v.setPartecipanti(rs.getString("Partecipanti"));
+
+                    v.setIDServizio(rs.getInt("IDServizio"));
+                    v.setNomeServizio(rs.getString("NomeServizio"));
+
+                    v.setIDRisorsa(rs.getInt("IDRisorsa"));
+                    v.setCapacitaRisorsa(rs.getInt("CapacitaRisorsa"));
+
+                    int staff = rs.getInt("IDStaff");
+                    v.setIDStaff(rs.wasNull() ? null : staff);
+
+                    list.add(v);
+                }
+            }
+        }
+
+        return list;
+    }
+
 }
