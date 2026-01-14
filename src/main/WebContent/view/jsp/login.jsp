@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/login.css">
 </head>
 <body>
+	<!-- Logo -->
+	<div class="logo">
+	    <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
+	</div>
+	
     <form method="post" action="${pageContext.request.contextPath}/login">
         <h1>Accedi</h1>
         

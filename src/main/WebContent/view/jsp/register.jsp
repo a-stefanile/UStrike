@@ -9,8 +9,12 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/register.css">
 </head>
 <body>
-
-<form method="post" action="${pageContext.request.contextPath}/register">
+	<!-- Logo -->
+	<div class="logo">
+	    <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
+	</div>
+	
+	<form method="post" action="${pageContext.request.contextPath}/register">
     <h1>Registrazione</h1>
 	
 	<c:if test="${not empty errorMessage}">
