@@ -39,40 +39,38 @@ public class RisorseDisponibiliServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         String idServizioStr = request.getParameter("idServizio");
-        String data = request.getParameter("data");      // YYYY-MM-DD
-        String orario = request.getParameter("orario");  // HH:00
-        
+        String dataStr = request.getParameter("data");      
+        String orarioStr = request.getParameter("orario");  
 
         try {
-            if (idServizioStr == null || data == null || orario == null ||
-                idServizioStr.isBlank() || data.isBlank() || orario.isBlank()) {
+            if (idServizioStr == null || dataStr == null || orarioStr == null ||
+                idServizioStr.isBlank() || dataStr.isBlank() || orarioStr.isBlank()) {
                 out.print("{\"success\":false,\"error\":\"Parametri mancanti\"}");
                 return;
             }
 
-         // Fasce consentite: 17-23 e 00-02
-            if (!orario.trim().matches("^(1[7-9]|2[0-3]|0[0-2]):00$")) {
+            // Validazione orario (17-23 e 00-02)
+            if (!orarioStr.trim().matches("^(1[7-9]|2[0-3]|0[0-2]):00$")) {
                 out.print("{\"success\":false,\"error\":\"Orario non valido (17:00-02:00)\"}");
                 return;
             }
 
-
             int idServizio = Integer.parseInt(idServizioStr.trim());
-            String fascia = orario.trim() + ":00"; // "14:00:00"
-            Timestamp tsOrario;
-            if (orario.startsWith("0")) {
-                // ore 00-02 → giorno successivo
-                LocalDate dataPrenotazione = LocalDate.parse(data.trim());
-                LocalTime ora = LocalTime.parse(orario.trim() + ":00");
-                tsOrario = Timestamp.valueOf(LocalDateTime.of(dataPrenotazione.plusDays(1), ora));
+            LocalDate dataPrenotazione = LocalDate.parse(dataStr.trim());
+            LocalTime oraPrenotazione = LocalTime.parse(orarioStr.trim() + ":00");
+            
+            LocalDateTime ldt;
+            if (oraPrenotazione.getHour() >= 0 && oraPrenotazione.getHour() <= 2) {
+                ldt = LocalDateTime.of(dataPrenotazione.plusDays(1), oraPrenotazione);
             } else {
-                tsOrario = Timestamp.valueOf(data.trim() + " " + orario.trim() + ":00");
+                ldt = LocalDateTime.of(dataPrenotazione, oraPrenotazione);
             }
-
+            
+            Timestamp tsOrario = Timestamp.valueOf(ldt);
 
             List<Risorsa> candidate = risorsaService.getRisorseLibereByServizio(idServizio);
-
             List<Risorsa> disponibili = new ArrayList<>();
+
             for (Risorsa r : candidate) {
                 if (risorsaService.isRisorsaDisponibile(r.getIDRisorsa(), tsOrario)) {
                     disponibili.add(r);
@@ -85,18 +83,15 @@ public class RisorseDisponibiliServlet extends HttpServlet {
                 Risorsa r = disponibili.get(i);
                 sb.append("{\"id\":").append(r.getIDRisorsa())
                   .append(",\"label\":\"Risorsa ").append(r.getIDRisorsa())
-                  .append(" (cap ").append(r.getCapacita()).append(")\"}");
+                  .append(" (Capacità: ").append(r.getCapacita()).append(")\"}");
                 if (i < disponibili.size() - 1) sb.append(",");
             }
             sb.append("]}");
 
             out.print(sb.toString());
-        } catch (NumberFormatException e) {
-            out.print("{\"success\":false,\"error\":\"IDServizio non valido\"}");
-        } catch (IllegalArgumentException e) {
-            out.print("{\"success\":false,\"error\":\"Data/orario non validi\"}");
         } catch (Exception e) {
-            out.print("{\"success\":false,\"error\":\"Errore server\"}");
+            e.printStackTrace(); // Utile per il debug sul server
+            out.print("{\"success\":false,\"error\":\"Errore interno del server\"}");
         } finally {
             out.flush();
         }

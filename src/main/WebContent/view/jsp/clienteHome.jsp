@@ -33,7 +33,7 @@
     </nav>
 
     <div class="container">
-        <h2>Home Cliente</h2>
+        <h2>La sfida si accende!</h2>
         <p style="text-align:center; font-size:1.2rem; margin-bottom:50px;">
             Benvenuto<%= (nome != null ? ", " + nome : "") %>!
         </p>

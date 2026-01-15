@@ -18,20 +18,20 @@
   <meta charset="UTF-8">
   <title>Le mie prenotazioni</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="<%= ctx %>/static/css/mie-prenotazioni.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/mie-prenotazioni.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
 
 <!-- Logo in alto a destra -->
 <div class="logo">
-    <img src="<%= ctx %>/static/images/logo.png" alt="UStrike Logo">
+    <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
 </div>
 
 <h2>Le mie prenotazioni</h2>
 
 <!-- Pulsante sempre visibile -->
-<a href="<%= ctx %>/cliente/crea-prenotazione" class="btn-prenota new-pren-btn">Nuova prenotazione</a>
+<a href="${pageContext.request.contextPath}/cliente/crea-prenotazione" class="btn-prenota new-pren-btn">Nuova prenotazione</a>
 
 <% if (prenotazioni.isEmpty()) { %>
   <p class="no-pren">Nessuna prenotazione presente.</p>

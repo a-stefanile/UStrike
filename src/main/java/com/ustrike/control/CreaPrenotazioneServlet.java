@@ -3,6 +3,7 @@ package com.ustrike.control;
 import com.ustrike.model.service.PrenotazioneService;
 import com.ustrike.model.service.RisorsaService;
 import com.ustrike.model.service.ServizioService;
+import com.ustrike.model.dto.Servizio;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,6 +14,10 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @WebServlet("/cliente/crea-prenotazione")
 public class CreaPrenotazioneServlet extends HttpServlet {
@@ -28,28 +33,25 @@ public class CreaPrenotazioneServlet extends HttpServlet {
 
         String tipo = request.getParameter("tipo"); // bowling | kart
         Integer idServizioSelezionato = null;
+        List<Servizio> serviziAbilitati = servizioService.getServiziAbilitati();
 
         if (tipo != null) {
-            for (var s : servizioService.getServiziAbilitati()) {
-                if (tipo.equalsIgnoreCase("bowling") &&
-                    s.getNomeServizio().equalsIgnoreCase("Bowling")) {
+            for (Servizio s : serviziAbilitati) {
+                if (tipo.equalsIgnoreCase("bowling") && s.getNomeServizio().equalsIgnoreCase("Bowling")) {
                     idServizioSelezionato = s.getIDServizio();
-                }
-                if (tipo.equalsIgnoreCase("kart") &&
-                    s.getNomeServizio().equalsIgnoreCase("Go-Kart")) {
+                } else if (tipo.equalsIgnoreCase("kart") && (s.getNomeServizio().equalsIgnoreCase("Go-Kart") || s.getNomeServizio().equalsIgnoreCase("GoKart"))) {
                     idServizioSelezionato = s.getIDServizio();
                 }
             }
         }
 
+        request.setAttribute("tipo", tipo); 
         request.setAttribute("idServizioSelezionato", idServizioSelezionato);
-        request.setAttribute("servizi", servizioService.getServiziAbilitati());
+        request.setAttribute("servizi", serviziAbilitati);
 
-        request.getRequestDispatcher("/view/jsp/prenotazioni-form.jsp")
-               .forward(request, response);
+        // Assicurati che il percorso della JSP sia corretto rispetto alla tua cartella WEB-INF o WebContent
+        request.getRequestDispatcher("/view/jsp/prenotazioni-form.jsp").forward(request, response);
     }
-
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -72,73 +74,62 @@ public class CreaPrenotazioneServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
-            String data = request.getParameter("data");        // YYYY-MM-DD
-            String orario = request.getParameter("orario");    // HH:00
-            String partecipanti = request.getParameter("partecipanti");
+            String dataStr = request.getParameter("data");
+            String orarioStr = request.getParameter("orario"); 
             String idServizioStr = request.getParameter("idServizio");
             String idRisorsaStr = request.getParameter("idRisorsa");
+            String numPartecipantiStr = request.getParameter("numPartecipanti");
 
-            if (isBlank(data) || isBlank(orario) || isBlank(idServizioStr) || isBlank(idRisorsaStr)) {
+            if (isBlank(dataStr) || isBlank(orarioStr) || isBlank(idServizioStr) || isBlank(idRisorsaStr) || isBlank(numPartecipantiStr)) {
                 out.print("{\"success\":false,\"error\":\"Parametri mancanti\"}");
                 return;
             }
-            if (isBlank(partecipanti)) {
-                out.print("{\"success\":false,\"error\":\"Partecipanti richiesti\"}");
-                return;
-            }
 
-            // Fasce orarie: HH:00
-            String fascia = orario.trim();
-            if (!fascia.matches("^([01]\\d|2[0-3]):00$")) {
-                out.print("{\"success\":false,\"error\":\"Orario non valido (solo fasce HH:00)\"}");
-                return;
-            }
+            int idServizio = Integer.parseInt(idServizioStr.trim());
+            int idRisorsa = Integer.parseInt(idRisorsaStr.trim());
+            int numPartecipanti = Integer.parseInt(numPartecipantiStr.trim());
 
-            int idServizio;
-            int idRisorsa;
-            try {
-                idServizio = Integer.parseInt(idServizioStr.trim());
-                idRisorsa = Integer.parseInt(idRisorsaStr.trim());
-            } catch (NumberFormatException e) {
-                out.print("{\"success\":false,\"error\":\"Dati numerici non validi\"}");
-                return;
+            // Calcolo Timestamp coerente (gestione mezzanotte)
+            LocalDate dataPren = LocalDate.parse(dataStr.trim());
+            LocalTime oraPren = LocalTime.parse(orarioStr.trim() + ":00");
+            LocalDateTime ldt;
+            if (oraPren.getHour() >= 0 && oraPren.getHour() <= 2) {
+                ldt = LocalDateTime.of(dataPren.plusDays(1), oraPren);
+            } else {
+                ldt = LocalDateTime.of(dataPren, oraPren);
             }
-            
-            if (!risorsaService.risorsaAppartieneAlServizio(idRisorsa, idServizio)) {
-                out.print("{\"success\":false,\"error\":\"Risorsa non coerente col servizio\"}");
-                return;
-            }
-
-            Timestamp tsData;
-            Timestamp tsOrario;
-            try {
-                tsData = Timestamp.valueOf(data.trim() + " 00:00:00");
-                tsOrario = Timestamp.valueOf(data.trim() + " " + fascia + ":00");
-            } catch (IllegalArgumentException e) {
-                out.print("{\"success\":false,\"error\":\"Data/orario non validi\"}");
-                return;
-            }
+            Timestamp tsOrario = Timestamp.valueOf(ldt);
+            Timestamp tsData = Timestamp.valueOf(dataPren.atStartOfDay());
 
             if (!risorsaService.isRisorsaDisponibile(idRisorsa, tsOrario)) {
-                out.print("{\"success\":false,\"error\":\"Risorsa non disponibile\"}");
+                out.print("{\"success\":false,\"error\":\"Risorsa non più disponibile per l'orario scelto\"}");
                 return;
             }
 
+            // Recupero nomi partecipanti
+            StringBuilder partecipantiSb = new StringBuilder();
+            for (int i = 1; i <= numPartecipanti; i++) {
+                String nome = request.getParameter("partecipante" + i);
+                if (nome != null && !nome.isBlank()) {
+                    if (partecipantiSb.length() > 0) partecipantiSb.append(", ");
+                    partecipantiSb.append(nome.trim());
+                }
+            }
+            String partecipanti = partecipantiSb.toString();
+
             int idPrenotazione = prenotazioneService.creaPrenotazione(
-                    tsData, tsOrario, partecipanti.trim(),
+                    tsData, tsOrario, partecipanti,
                     idServizio, idRisorsa, userId, session
             );
 
-            if (idPrenotazione <= 0) {
-                out.print("{\"success\":false,\"error\":\"Creazione fallita\"}");
-                return;
+            if (idPrenotazione > 0) {
+                out.print("{\"success\":true,\"message\":\"Richiesta inviata con successo!\"}");
+            } else {
+                out.print("{\"success\":false,\"error\":\"Errore durante il salvataggio della prenotazione\"}");
             }
-
-            // SOLUZIONE 1: messaggio in risposta
-            out.print("{\"success\":true,"
-                    + "\"idPrenotazione\":" + idPrenotazione + ","
-                    + "\"message\":\"Richiesta inviata con successo. Attendi la conferma del nostro staff.\""
-                    + "}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().print("{\"success\":false,\"error\":\"Errore server\"}");
         }
     }
 
