@@ -35,16 +35,28 @@
 	    <label>Data</label>
 	    <input type="date" name="data" id="data" required>
 	
-	    <label>Fascia oraria</label>
-	    <select name="orario" id="orario" required>
-	        <option value="">-- Seleziona --</option>
-	        <% for (int h = 0; h < 24; h++) {
-	            String hh = (h < 10 ? "0" + h : "" + h);
-	        %>
-	        <option value="<%= hh %>:00"><%= hh %>:00 - <%= hh %>:59</option>
-	        <% } %>
-	    </select>
-	
+	   <label>Fascia oraria</label>
+		<select name="orario" id="orario" required>
+		    <option value="">-- Seleziona --</option>
+		
+		    <% 
+		        // Ore serali: dalle 17 alle 23 dello stesso giorno
+		        for (int h = 17; h <= 23; h++) {
+		            String hh = (h < 10 ? "0" + h : "" + h);
+		    %>
+		        <option value="<%= hh %>:00"><%= hh %>:00 - <%= hh %>:59</option>
+		    <% } %>
+		
+		    <% 
+		        // Ore notturne: 00 alle 02 del giorno successivo
+		        for (int h = 0; h <= 2; h++) {
+		            String hh = "0" + h;
+		    %>
+		        <option value="<%= hh %>:00"><%= hh %>:00 - <%= hh %>:59</option>
+		    <% } %>
+		</select>
+
+
 		<% if (idServizioSelezionato == null) { %>
 		    <label>Servizio</label>
 		    <select name="idServizio" id="idServizio" required>
@@ -61,7 +73,7 @@
 	
 	    <label>Risorsa disponibile</label>
 	    <select name="idRisorsa" id="idRisorsa" required>
-	        <option value="">-- Seleziona servizio/data/orario --</option>
+	        <option value="">-- Seleziona data/orario per visualizzare --</option>
 	    </select>
 	
 	    <label>Partecipanti</label>

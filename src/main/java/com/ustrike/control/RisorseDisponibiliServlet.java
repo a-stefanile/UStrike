@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,7 @@ public class RisorseDisponibiliServlet extends HttpServlet {
         String idServizioStr = request.getParameter("idServizio");
         String data = request.getParameter("data");      // YYYY-MM-DD
         String orario = request.getParameter("orario");  // HH:00
+        
 
         try {
             if (idServizioStr == null || data == null || orario == null ||
@@ -46,14 +50,25 @@ public class RisorseDisponibiliServlet extends HttpServlet {
                 return;
             }
 
-            // Fasce di 1 ora: HH:00
-            if (!orario.trim().matches("^([01]\\d|2[0-3]):00$")) {
-                out.print("{\"success\":false,\"error\":\"Orario non valido (solo fasce HH:00)\"}");
+         // Fasce consentite: 17-23 e 00-02
+            if (!orario.trim().matches("^(1[7-9]|2[0-3]|0[0-2]):00$")) {
+                out.print("{\"success\":false,\"error\":\"Orario non valido (17:00-02:00)\"}");
                 return;
             }
 
+
             int idServizio = Integer.parseInt(idServizioStr.trim());
-            Timestamp tsOrario = Timestamp.valueOf(data.trim() + " " + orario.trim() + ":00");
+            String fascia = orario.trim() + ":00"; // "14:00:00"
+            Timestamp tsOrario;
+            if (orario.startsWith("0")) {
+                // ore 00-02 → giorno successivo
+                LocalDate dataPrenotazione = LocalDate.parse(data.trim());
+                LocalTime ora = LocalTime.parse(orario.trim() + ":00");
+                tsOrario = Timestamp.valueOf(LocalDateTime.of(dataPrenotazione.plusDays(1), ora));
+            } else {
+                tsOrario = Timestamp.valueOf(data.trim() + " " + orario.trim() + ":00");
+            }
+
 
             List<Risorsa> candidate = risorsaService.getRisorseLibereByServizio(idServizio);
 

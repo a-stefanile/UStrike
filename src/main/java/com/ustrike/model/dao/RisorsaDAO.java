@@ -99,25 +99,29 @@ public class RisorsaDAO {
      * e stato diverso da Rifiutata/Annullata.
      */
     public boolean isDisponibile(int idRisorsa, Timestamp orario) throws SQLException {
+        // Confronto solo data + ora (HH), ignorando minuti e secondi
         String sql = """
             SELECT COUNT(*)
             FROM Prenotazione p
             WHERE p.IDRisorsa = ?
-              AND p.Orario = ?
+              AND DATE(p.Orario) = ?
+              AND HOUR(p.Orario) = ?
               AND p.StatoPrenotazione NOT IN ('Rifiutata', 'Annullata')
-            """;
+        """;
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, idRisorsa);
-            ps.setTimestamp(2, orario);
+            ps.setDate(2, new java.sql.Date(orario.getTime()));  // solo giorno/mese/anno
+            ps.setInt(3, orario.toLocalDateTime().getHour());   // solo ora
 
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() && rs.getInt(1) == 0;
             }
         }
     }
+
 
     private Risorsa mapResultSetToRisorsa(ResultSet rs) throws SQLException {
         return new Risorsa(
