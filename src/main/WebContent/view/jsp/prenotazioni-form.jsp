@@ -104,13 +104,13 @@
     <a href="${pageContext.request.contextPath}/cliente/home" class="home-btn">
     <i class="fas fa-home"></i> Home
 	</a>
-</div>
+	</div>
 
-<script>
-    // Passiamo il context path al file JS esterno
-    var ctx = '<%= ctx %>';
-</script>
-<script src="${pageContext.request.contextPath}/static/js/prenotazioni.js"></script>
+	<script>
+	    var ctx = "${pageContext.request.contextPath}";
+	</script>
+	
+	<script src="${pageContext.request.contextPath}/static/JavaScript/prenotazioni.js"></script>
 
 </body>
 </html>
