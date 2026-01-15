@@ -13,33 +13,28 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
   <meta charset="UTF-8">
   <title>Le mie prenotazioni</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    table { border-collapse: collapse; width: 100%; max-width: 1100px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #f3f3f3; text-align: left; }
-    .badge { padding: 2px 8px; border: 1px solid #ccc; border-radius: 10px; display:inline-block; }
-    .ok { border-color:#2e7d32; }
-    .warn { border-color:#ef6c00; }
-    .err { border-color:#c62828; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="<%= ctx %>/static/css/mie-prenotazioni.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
 
-<h2>Le mie prenotazioni</h2>
-
-<div style="margin-bottom:10px;">
-  <a href="<%= ctx %>/cliente/crea-prenotazione">Nuova prenotazione</a> |
-  <a href="<%= ctx %>/cliente/dashboard">Dashboard</a> |
-  <a href="<%= ctx %>/logout">Logout</a>
+<!-- Logo in alto a destra -->
+<div class="logo">
+    <img src="<%= ctx %>/static/images/logo.png" alt="UStrike Logo">
 </div>
 
+<h2>Le mie prenotazioni</h2>
+
+<!-- Pulsante sempre visibile -->
+<a href="<%= ctx %>/cliente/crea-prenotazione" class="btn-prenota new-pren-btn">Nuova prenotazione</a>
+
 <% if (prenotazioni.isEmpty()) { %>
-  <p>Nessuna prenotazione presente.</p>
+  <p class="no-pren">Nessuna prenotazione presente.</p>
 <% } else { %>
 
 <table>
@@ -58,7 +53,7 @@
 
   <tbody>
     <% for (PrenotazioneView p : prenotazioni) {
-         String stato = (p.getStatoPrenotazione() == null) ? "" : p.getStatoPrenotazione();
+         String stato = (p.getStatoPrenotazione() == null) ? "-" : p.getStatoPrenotazione();
          String cls = "badge";
          if ("Confermata".equalsIgnoreCase(stato)) cls += " ok";
          else if ("In attesa".equalsIgnoreCase(stato)) cls += " warn";
@@ -82,6 +77,16 @@
 </table>
 
 <% } %>
+
+<!-- Bottone per tornare alla Home Cliente -->
+<a href="${pageContext.request.contextPath}/cliente/home" class="home-btn">
+    <i class="fas fa-home"></i> Home
+</a>
+
+<!-- Logout con icona -->
+<a href="${pageContext.request.contextPath}/logout" class="logout-btn">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</a>
 
 </body>
 </html>
