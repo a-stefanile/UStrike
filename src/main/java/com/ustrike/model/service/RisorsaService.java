@@ -6,18 +6,17 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class RisorsaService {
+
     private final RisorsaDAO dao = new RisorsaDAO();
 
-    
     public int creaRisorsa(int stato, int capacita, int idServizio) {
         try {
-            return dao.insertRisorsa(stato, capacita, idServizio);  // Nuova IDRisorsa
+            return dao.insertRisorsa(stato, capacita, idServizio);
         } catch (Exception e) {
             throw new RuntimeException("Errore creazione risorsa", e);
         }
     }
 
-    
     public boolean eliminaRisorsa(int idRisorsa) {
         try {
             return dao.deleteRisorsa(idRisorsa);
@@ -26,7 +25,6 @@ public class RisorsaService {
         }
     }
 
-    
     public boolean aggiornaRisorsa(int idRisorsa, int nuovoStato, int nuovaCapacita) {
         try {
             return dao.updateRisorsa(idRisorsa, nuovoStato, nuovaCapacita);
@@ -35,7 +33,6 @@ public class RisorsaService {
         }
     }
 
-    
     public boolean aggiornaStatoRisorsa(int idRisorsa, int nuovoStato) {
         try {
             Risorsa r = dao.selectRisorsa(idRisorsa);
@@ -50,7 +47,6 @@ public class RisorsaService {
         }
     }
 
-    
     public List<Risorsa> getTutteLeRisorse() {
         try {
             return dao.selectAllRisorse();
@@ -59,16 +55,14 @@ public class RisorsaService {
         }
     }
 
-    
     public List<Risorsa> getRisorseLibereByServizio(int idServizio) {
         try {
-            return dao.selectRisorseByServizio(idServizio);  // Stato=1 ORDER Capacita
+            return dao.selectRisorseByServizio(idServizio);
         } catch (Exception e) {
             throw new RuntimeException("Errore risorse libere servizio " + idServizio, e);
         }
     }
 
-    
     public Risorsa getRisorsaById(int idRisorsa) {
         try {
             return dao.selectRisorsa(idRisorsa);
@@ -77,7 +71,6 @@ public class RisorsaService {
         }
     }
 
-    
     public boolean isRisorsaDisponibile(int idRisorsa, Timestamp dataOra) {
         try {
             return dao.isDisponibile(idRisorsa, dataOra);
@@ -85,4 +78,14 @@ public class RisorsaService {
             throw new RuntimeException("Errore check disponibilità", e);
         }
     }
+
+    public boolean risorsaAppartieneAlServizio(int idRisorsa, int idServizio) {
+        try {
+            Risorsa r = dao.selectRisorsa(idRisorsa);
+            return r != null && r.getIDServizio() == idServizio;
+        } catch (Exception e) {
+            throw new RuntimeException("Errore verifica risorsa-servizio", e);
+        }
+    }
+
 }

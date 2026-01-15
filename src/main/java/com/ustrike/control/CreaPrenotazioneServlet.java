@@ -26,9 +26,30 @@ public class CreaPrenotazioneServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String tipo = request.getParameter("tipo"); // bowling | kart
+        Integer idServizioSelezionato = null;
+
+        if (tipo != null) {
+            for (var s : servizioService.getServiziAbilitati()) {
+                if (tipo.equalsIgnoreCase("bowling") &&
+                    s.getNomeServizio().equalsIgnoreCase("Bowling")) {
+                    idServizioSelezionato = s.getIDServizio();
+                }
+                if (tipo.equalsIgnoreCase("kart") &&
+                    s.getNomeServizio().equalsIgnoreCase("Go-Kart")) {
+                    idServizioSelezionato = s.getIDServizio();
+                }
+            }
+        }
+
+        request.setAttribute("idServizioSelezionato", idServizioSelezionato);
         request.setAttribute("servizi", servizioService.getServiziAbilitati());
-        request.getRequestDispatcher("/view/jsp/prenotazioni-form.jsp").forward(request, response);
+
+        request.getRequestDispatcher("/view/jsp/prenotazioni-form.jsp")
+               .forward(request, response);
     }
+
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -80,6 +101,11 @@ public class CreaPrenotazioneServlet extends HttpServlet {
                 idRisorsa = Integer.parseInt(idRisorsaStr.trim());
             } catch (NumberFormatException e) {
                 out.print("{\"success\":false,\"error\":\"Dati numerici non validi\"}");
+                return;
+            }
+            
+            if (!risorsaService.risorsaAppartieneAlServizio(idRisorsa, idServizio)) {
+                out.print("{\"success\":false,\"error\":\"Risorsa non coerente col servizio\"}");
                 return;
             }
 

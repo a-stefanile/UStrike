@@ -127,4 +127,29 @@ public class RisorsaDAO {
                 rs.getInt("IDServizio")
         );
     }
+    
+    public Risorsa findById(int idRisorsa) {
+        Risorsa r = null;
+        String sql = "SELECT idRisorsa, stato, capacita, idServizio FROM risorsa WHERE idRisorsa = ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idRisorsa);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                r = new Risorsa(
+                    rs.getInt("idRisorsa"),
+                    rs.getInt("stato"),
+                    rs.getInt("capacita"),
+                    rs.getInt("idServizio")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return r;
+    }
+
 }

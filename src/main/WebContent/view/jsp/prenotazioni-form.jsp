@@ -3,6 +3,11 @@
 <%@ page import="com.ustrike.model.dto.Servizio" %>
 
 <%
+    Integer idServizioSelezionato =
+        (Integer) request.getAttribute("idServizioSelezionato");
+%>
+
+<%
     String ctx = request.getContextPath();
     List<Servizio> servizi = (List<Servizio>) request.getAttribute("servizi");
     if (servizi == null) servizi = Collections.emptyList();
@@ -41,13 +46,19 @@
         <% } %>
     </select>
 
-    <label>Servizio</label>
-    <select name="idServizio" id="idServizio" required>
-        <option value="">-- Seleziona --</option>
-        <% for (Servizio s : servizi) { %>
-            <option value="<%= s.getIDServizio() %>"><%= s.getNomeServizio() %></option>
-        <% } %>
-    </select>
+	<% if (idServizioSelezionato == null) { %>
+	    <label>Servizio</label>
+	    <select name="idServizio" id="idServizio" required>
+	        <option value="">-- Seleziona --</option>
+	        <% for (Servizio s : servizi) { %>
+	            <option value="<%= s.getIDServizio() %>"><%= s.getNomeServizio() %></option>
+	        <% } %>
+	    </select>
+	<% } else { %>
+	    <input type="hidden" name="idServizio" id="idServizio"
+	           value="<%= idServizioSelezionato %>">
+	<% } %>
+
 
     <label>Risorsa disponibile</label>
     <select name="idRisorsa" id="idRisorsa" required>
