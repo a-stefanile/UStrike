@@ -30,11 +30,12 @@
     <div class="container">
         <h2>La sfida si accende!</h2>
         <p style="text-align:center; font-size:1.2rem; margin-bottom:50px;">
-            Metti KO i tuoi amici in pista o sulla corsia.
+            Metti KO i tuoi amici in pista, sulla corsia o al biliardo.
         </p>
+
         <section class="section">
             <div class="section-content">
-                <h3>Divertimento Bowling</h3>
+                <h3>Divertimento al Bowling</h3>
                 <p>
                     Vivi l'emozione del bowling nel nostro centro moderno a Napoli! Piste professionali illuminate 
                     da luci LED spettacolari. Sfida i tuoi amici sulle nostre 8 piste professionali.
@@ -54,8 +55,9 @@
                  style="background-image: url('${pageContext.request.contextPath}/static/images/kart.jpeg');">
             </div>
             <div class="section-content">
-                <h3>Adrenalina Go-Kart</h3>
+                <h3>Adrenalina coi Go-Kart</h3>
                 <p>
+                    Curve mozzafiato, rettilinei veloci!
                     Sfreccia sul nostro circuito professionale indoor di 500 metri con kart elettrici 
                     potenti e sicuri! Ideale per sfide competitive ed eventi.
                 </p>
@@ -64,6 +66,23 @@
                 </a>
             </div>
         </section>
+
+        <section class="section">
+            <div class="section-content">
+                <h3>Precisione al Biliardo</h3>
+                <p>
+                    Tra una corsa e uno strike, concediti una pausa di classe. I nostri tavoli professionali 
+                    ti aspettano per sfide di pura concentrazione e strategia. Calibra il tiro e imbuca la vittoria!
+                </p>
+                <a href="${pageContext.request.contextPath}/biliardo.jsp" class="btn-prenota">
+                    Per maggiori informazioni
+                </a>
+            </div>
+            <div class="section-image" 
+                 style="background-image: url('${pageContext.request.contextPath}/static/images/biliardo.jpg');">
+            </div>
+        </section>
+
     </div>
 
     <script>

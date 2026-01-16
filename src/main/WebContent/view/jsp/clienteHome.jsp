@@ -12,19 +12,16 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/clienteHome.css">
 </head>
 <body>
-	<!-- Logo -->
-	<div class="logo">
-	    <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
-	</div>
+    <div class="logo">
+        <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
+    </div>
 
-    <!-- Hamburger Menu -->
     <div class="hamburger" onclick="toggleMenu()">
         <span></span>
         <span></span>
         <span></span>
     </div>
 
-    <!-- Menu Navigazione -->
     <nav class="nav-menu" id="navMenu">
         <ul>
             <li><a href="${pageContext.request.contextPath}/cliente/prenotazioni">Le mie prenotazioni</a></li>
@@ -38,15 +35,12 @@
             Benvenuto<%= (nome != null ? ", " + nome : "") %>!
         </p>
 
-        <!-- BOWLING: TESTO SX + IMG DX -->
         <section class="section">
             <div class="section-content">
-                <h3>Divertimento Bowling</h3>
+                <h3>Divertimento al Bowling</h3>
                 <p>
                     Vivi l'emozione del bowling nel nostro centro moderno a Napoli! Piste professionali illuminate 
-                    da luci LED spettacolari, atmosfera perfetta per amici, famiglia e compleanni. Sfida i tuoi 
-                    amici sulle nostre 8 piste professionali con birilli automatici e sistema di punteggio digitale.
-                    Disponibile tutti i giorni dalle 10:00 alle 24:00.
+                    da luci LED spettacolari. Sfida i tuoi amici sulle nostre 8 piste professionali.
                 </p>
                 <a href="${pageContext.request.contextPath}/cliente/crea-prenotazione?tipo=bowling" class="btn-prenota">
                     Crea Prenotazione Bowling
@@ -57,22 +51,36 @@
             </div>
         </section>
 
-        <!-- KART: IMG SX + TESTO DX -->
         <section class="section reverse">
             <div class="section-image" 
                  style="background-image: url('${pageContext.request.contextPath}/static/images/kart.jpeg');">
             </div>
             <div class="section-content">
-                <h3>Adrenalina Go-Kart</h3>
+                <h3>Adrenalina coi Go-Kart</h3>
                 <p>
-                    Sfreccia sul nostro circuito professionale indoor all'aperto di 500 metri con kart elettrici 
-                    potenti e sicuri! Curve mozzafiato, rettilinei veloci e tempi cronometrati professionali. 
-                    Ideale per sfide competitive, uscite adrenaline e eventi aziendali. Casco e tuta forniti.
-                    Aperto dalle 14:00 alle 23:00 con sessioni da 10 minuti.
+                    Curve mozzafiato, rettilinei veloci!
+                    Sfreccia sul nostro circuito professionale indoor di 500 metri con kart elettrici 
+                    potenti e sicuri! Ideale per sfide competitive ed eventi.
                 </p>
                 <a href="${pageContext.request.contextPath}/cliente/crea-prenotazione?tipo=kart" class="btn-prenota">
                     Crea Prenotazione Go-Kart
                 </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-content">
+                <h3>Precisione al Biliardo</h3>
+                <p>
+                    Tra una corsa e uno strike, concediti una pausa di classe. I nostri tavoli professionali 
+                    ti aspettano per sfide di pura concentrazione e strategia. Calibra il tiro e imbuca la vittoria!
+                </p>
+                <a href="${pageContext.request.contextPath}/biliardo.jsp" class="btn-prenota">
+                    Per maggiori informazioni
+                </a>
+            </div>
+            <div class="section-image" 
+                 style="background-image: url('${pageContext.request.contextPath}/static/images/biliardo.jpg');">
             </div>
         </section>
     </div>
