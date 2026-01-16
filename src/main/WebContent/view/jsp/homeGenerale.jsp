@@ -74,7 +74,7 @@
                     Tra una corsa e uno strike, concediti una pausa di classe. I nostri tavoli professionali 
                     ti aspettano per sfide di pura concentrazione e strategia. Calibra il tiro e imbuca la vittoria!
                 </p>
-                <a href="${pageContext.request.contextPath}/biliardo.jsp" class="btn-prenota">
+                <a href="${pageContext.request.contextPath}/biliardo" class="btn-prenota">
                     Per maggiori informazioni
                 </a>
             </div>
