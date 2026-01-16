@@ -130,9 +130,7 @@ async function updateStato(idPrenotazione, action) {
 }
 </script>
 
-<a href="<%= ctx %>/staff/dashboard" class="home-btn">
-    <i class="fas fa-home"></i> Home
-</a>
+
 
 <a href="<%= ctx %>/logout" class="logout-btn">
     <i class="fas fa-sign-out-alt"></i> Logout
