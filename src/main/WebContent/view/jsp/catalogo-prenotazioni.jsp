@@ -13,30 +13,32 @@
 <head>
     <meta charset="UTF-8">
     <title>UStrike - Dashboard Staff</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        th { background: #f3f3f3; }
-        .msg { margin: 10px 0; padding: 8px; border: 1px solid #ccc; display: none; }
-        .msg.ok { border-color: #2e7d32; }
-        .msg.err { border-color: #c62828; }
-        button { margin-right: 6px; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="<%= ctx %>/static/css/dashboard.css">
 </head>
 <body>
 
-<h2>Dashboard Staff - Catalogo Prenotazioni</h2>
-
-<div>
-    <a href="<%= ctx %>/staff/catalogo?filter=inAttesa">In attesa</a> |
-    <a href="<%= ctx %>/staff/catalogo?filter=completate">Completate</a> |
-    <a href="<%= ctx %>/staff/catalogo?filter=all">Tutte</a> |
-    <a href="<%= ctx %>/logout">Logout</a>
+<div class="logo">
+    <img src="<%= ctx %>/static/images/logo.png" alt="UStrike Logo">
 </div>
+
+<div class="page-header">
+    <h2>Dashboard Staff - Catalogo Prenotazioni</h2>
+
+    <div class="filter-bar">
+        <a href="<%= ctx %>/staff/catalogo?filter=inAttesa">In attesa</a>
+        <a href="<%= ctx %>/staff/catalogo?filter=completate">Completate</a>
+        <a href="<%= ctx %>/staff/catalogo?filter=all">Tutte</a>
+    </div>
+
+    <p class="active-filter">
+        Filtro attivo: <b><%= filter %></b>
+    </p>
+</div>
+
 
 <div id="msg" class="msg"></div>
 
-<p>Filtro attivo: <b><%= filter %></b></p>
 
 <table>
     <thead>
@@ -127,6 +129,14 @@ async function updateStato(idPrenotazione, action) {
     }
 }
 </script>
+
+<a href="<%= ctx %>/staff/dashboard" class="home-btn">
+    <i class="fas fa-home"></i> Home
+</a>
+
+<a href="<%= ctx %>/logout" class="logout-btn">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</a>
 
 </body>
 </html>
