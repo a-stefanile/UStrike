@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../images/27263.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #000d1d;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* =========================
+   LOGO
+========================= */
+
+/* Logo in alto a sinistra */
+.logo {
+    position: fixed;
+    top: 70px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    height: 50px; /* stessa altezza hamburger */
+}
+
+
+.logo img {
+    height: 400px;
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.logo img:hover {
+    transform: scale(1.05);
+}
+
+/* =========================
+   HAMBURGER
+========================= */
+.hamburger {
+    position: fixed;
+    top: 40px;
+    right: 25px;
+    z-index: 1001;
+    width: 50px;
+    height: 50px;
+    background: rgba(0,13,29,0.85);
+    border: 2px solid #e42f1c;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.3s ease;
+}
+
+.hamburger:hover {
+    background: #e42f1c;
+}
+
+.hamburger span {
+    width: 24px;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+/* =========================
+   MENU LATERALE
+========================= */
+.nav-menu {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 320px;
+    height: 100vh;
+    background: #000d1d;
+    padding-top: 120px;
+    transition: right 0.4s ease;
+    z-index: 1000;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.7);
+}
+
+.nav-menu.active {
+    right: 0;
+}
+
+.nav-menu ul {
+    list-style: none;
+}
+
+.nav-menu a {
+    display: block;
+    color: #ffffff;
+    text-decoration: none;
+
+}
