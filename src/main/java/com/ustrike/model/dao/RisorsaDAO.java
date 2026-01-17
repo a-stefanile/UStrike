@@ -3,53 +3,46 @@ package com.ustrike.model.dao;
 import com.ustrike.model.dto.Risorsa;
 import com.ustrike.util.DBConnection;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RisorsaDAO {
 
-    public void insertRisorsa(int stato, int capacita, int idServizio) throws SQLException {
-        String SQL = "INSERT INTO Risorsa (Stato, Capacita, IDServizio) VALUES (?, ?, ?);";
+    public int insertRisorsa(int stato, int capacita, int idServizio) throws SQLException {
+        String sql = "INSERT INTO Risorsa (Stato, Capacita, IDServizio) VALUES (?, ?, ?)";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, stato);
             ps.setInt(2, capacita);
             ps.setInt(3, idServizio);
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            if (rows <= 0) return -1;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
         }
     }
 
     public Risorsa selectRisorsa(int idRisorsa) throws SQLException {
-        String SQL = "SELECT * FROM Risorsa WHERE IDRisorsa = ?;";
+        String sql = "SELECT * FROM Risorsa WHERE IDRisorsa = ?";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idRisorsa);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Risorsa(
-                    rs.getInt("IDRisorsa"),
-                    rs.getInt("Stato"),
-                    rs.getInt("Capacita"),
-                    rs.getInt("IDServizio")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapResultSetToRisorsa(rs) : null;
             }
         }
-        return null;
     }
 
     public List<Risorsa> selectAllRisorse() throws SQLException {
         List<Risorsa> risorse = new ArrayList<>();
-        String SQL = "SELECT * FROM Risorsa;";
+        String sql = "SELECT * FROM Risorsa ORDER BY IDServizio, Capacita";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                risorse.add(new Risorsa(
-                    rs.getInt("IDRisorsa"),
-                    rs.getInt("Stato"),
-                    rs.getInt("Capacita"),
-                    rs.getInt("IDServizio")
-                ));
+                risorse.add(mapResultSetToRisorsa(rs));
             }
         }
         return risorse;
@@ -57,27 +50,23 @@ public class RisorsaDAO {
 
     public List<Risorsa> selectRisorseByServizio(int idServizio) throws SQLException {
         List<Risorsa> risorse = new ArrayList<>();
-        String SQL = "SELECT * FROM Risorsa WHERE IDServizio = ? AND Stato = 1 ORDER BY Capacita;";
+        String sql = "SELECT * FROM Risorsa WHERE IDServizio = ? AND Stato = 1 ORDER BY Capacita ASC";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idServizio);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                risorse.add(new Risorsa(
-                    rs.getInt("IDRisorsa"),
-                    rs.getInt("Stato"),
-                    rs.getInt("Capacita"),
-                    idServizio
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    risorse.add(mapResultSetToRisorsa(rs));
+                }
             }
         }
         return risorse;
     }
 
     public boolean updateRisorsa(int idRisorsa, int stato, int capacita) throws SQLException {
-        String SQL = "UPDATE Risorsa SET Stato = ?, Capacita = ? WHERE IDRisorsa = ?;";
+        String sql = "UPDATE Risorsa SET Stato = ?, Capacita = ? WHERE IDRisorsa = ?";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, stato);
             ps.setInt(2, capacita);
             ps.setInt(3, idRisorsa);
@@ -86,11 +75,41 @@ public class RisorsaDAO {
     }
 
     public boolean deleteRisorsa(int idRisorsa) throws SQLException {
-        String SQL = "DELETE FROM Risorsa WHERE IDRisorsa = ?;";
+        String sql = "DELETE FROM Risorsa WHERE IDRisorsa = ?";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idRisorsa);
             return ps.executeUpdate() > 0;
         }
+    }
+
+    public boolean isDisponibile(int idRisorsa, Timestamp orario) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Prenotazione " +
+                     "WHERE IDRisorsa = ? " +
+                     "AND DATE(Orario) = ? " +
+                     "AND HOUR(Orario) = ? " +
+                     "AND StatoPrenotazione NOT IN ('Rifiutata', 'Annullata')";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            
+            LocalDateTime ldt = orario.toLocalDateTime();
+            ps.setInt(1, idRisorsa);
+            ps.setDate(2, java.sql.Date.valueOf(ldt.toLocalDate()));
+            ps.setInt(3, ldt.getHour());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) == 0;
+            }
+        }
+    }
+
+    private Risorsa mapResultSetToRisorsa(ResultSet rs) throws SQLException {
+        return new Risorsa(
+                rs.getInt("IDRisorsa"),
+                rs.getInt("Stato"),
+                rs.getInt("Capacita"),
+                rs.getInt("IDServizio")
+        );
     }
 }

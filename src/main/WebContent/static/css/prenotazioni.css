@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body + sfondo */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../images/27263.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: #000d1d;
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 120px 20px 40px;
+}
+
+/* Logo */
+.logo {
+    position: fixed;
+    top: 40px;
+    right: 15px;
+    z-index: 1000;
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 300px;
+    width: auto;
+}
+
+/* Titolo */
+h2 {
+    text-align: center;
+    font-size: 2.6rem;
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+/* Box form */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 40px 35px;
+    background: rgba(0, 13, 29, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* Label */
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+/* Input / Select / Textarea */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.25);
+    color: #ffffff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #e42f1c;
+    box-shadow: 0 0 0 2px rgba(228,47,28,0.3);
+}
+
+/* Select arrow fix */
+select option {
+    color: #000;
+}
+
+/* Pulsante */
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 50px;
+    border: none;
+    background: #e42f1c;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #ffffff;
+    color: #000d1d;
+}
+
+.home-btn {
+    position: fixed;
+    right: 20px;
+    background: linear-gradient(135deg, #000d1d, #e42f1c);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 20px rgba(228, 47, 28, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Home sopra logout */
+.home-btn {
+    bottom: 20px; /* 50px sopra il logout */
+}
+
+
+.home-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(228, 47, 28, 0.6);
+}
+
+/* Messaggi */
+#msg {
+    display: none;
+    max-width: 500px;
+    margin: 0 auto 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+    background: rgba(0,0,0,0.4);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    h2 {
+        font-size: 2rem;
+    }
+
+    form {
+        padding: 30px 25px;
+    }
+
+    .logo img {
+        height: 55px;
+    }
+}

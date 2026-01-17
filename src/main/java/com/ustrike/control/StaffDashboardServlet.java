@@ -1,6 +1,7 @@
 package com.ustrike.control;
 
-import com.ustrike.model.service.PrenotazioneService;
+import com.ustrike.model.CatalogoPrenotazioni;
+import com.ustrike.model.dao.PrenotazioneDAO;
 import com.ustrike.model.dto.Prenotazione;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,61 +15,89 @@ import java.util.List;
 
 @WebServlet("/staff/catalogo")
 public class StaffDashboardServlet extends HttpServlet {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private final PrenotazioneService service = new PrenotazioneService();
-    
+    private static final long serialVersionUID = 1L;
+
+    private final CatalogoPrenotazioni catalogo = CatalogoPrenotazioni.getInstance();
+    private final PrenotazioneDAO dao = new PrenotazioneDAO();
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        // Filtro già verifica "staff"
+
         String filter = request.getParameter("filter");
         if (filter == null) filter = "inAttesa";
-        
+
         List<Prenotazione> prenotazioni;
-        if ("inAttesa".equals(filter)) {
-            prenotazioni = service.getCatalogoInAttesa();
-        } else {
-            prenotazioni = service.getCatalogoCompletate();
+        switch (filter) {
+            case "inAttesa":
+                prenotazioni = catalogo.getPrenotazioniInAttesa();
+                break;
+            case "completate":
+                prenotazioni = catalogo.getPrenotazioniCompletate();
+                break;
+            case "all":
+                prenotazioni = catalogo.getTuttePrenotazioni();
+                break;
+            default:
+                filter = "inAttesa";
+                prenotazioni = catalogo.getPrenotazioniInAttesa();
         }
-        
+
         request.setAttribute("prenotazioni", prenotazioni);
         request.setAttribute("filter", filter);
-        request.getRequestDispatcher("/staff/catalogo-prenotazioni.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/jsp/catalogo-prenotazioni.jsp").forward(request, response);
     }
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         HttpSession session = request.getSession(false);
-        int userId = (int) session.getAttribute("userId");
-        String action = request.getParameter("action");
-        int idPrenotazione = Integer.parseInt(request.getParameter("idPrenotazione"));
-        
+        if (session == null || !"staff".equals(session.getAttribute("ruolo"))) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        Integer staffIdObj = (Integer) session.getAttribute("userId");
+        if (staffIdObj == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        int staffId = staffIdObj;
+
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-        
+
+        String action = request.getParameter("action");
+        String idStr = request.getParameter("idPrenotazione");
+
         try {
+            if (action == null || idStr == null || idStr.trim().isEmpty()) {
+                out.print("{\"success\":false,\"error\":\"Parametri mancanti\"}");
+                return;
+            }
+
+            int idPrenotazione = Integer.parseInt(idStr.trim());
             boolean success;
+
             switch (action) {
                 case "accetta":
-                    success = service.accettaPrenotazione(idPrenotazione, userId);
+                    success = dao.updateStatoPrenotazione(idPrenotazione, "Confermata", staffId);
                     break;
                 case "rifiuta":
-                    String motivo = request.getParameter("motivo");
-                    success = service.rifiutaPrenotazione(idPrenotazione, userId, motivo);
+                    success = dao.updateStatoPrenotazione(idPrenotazione, "Rifiutata", staffId);
                     break;
                 default:
-                    out.print("{\"success\":false,\"error\":\"Action invalida\"}");
+                    out.print("{\"success\":false,\"error\":\"Action non valida\"}");
                     return;
             }
+
             out.print("{\"success\":" + success + "}");
+        } catch (NumberFormatException e) {
+            out.print("{\"success\":false,\"error\":\"ID prenotazione non valido\"}");
         } catch (Exception e) {
-            out.print("{\"success\":false,\"error\":\"" + e.getMessage() + "\"}");
+            out.print("{\"success\":false,\"error\":\"Errore server\"}");
         } finally {
             out.flush();
         }

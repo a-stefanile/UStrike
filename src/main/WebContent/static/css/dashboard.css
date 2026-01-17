@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../images/27263.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Logo */
+.logo {
+    position: fixed;
+    top: 40px;
+    right: 15px;
+    z-index: 1000;
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 300px;
+    width: auto;
+}
+
+
+/* Titolo */
+h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+/* Header pagina */
+.page-header {
+    margin-left: 20px;
+    margin-top: 25px;
+}
+
+/* Filtro attivo */
+.active-filter {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Barra filtri */
+.filter-bar {
+    margin-top: 15px;
+    display: flex;
+    gap: 15px;
+}
+
+.filter-bar a {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(0,13,29,0.8);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-bar a:hover {
+    background: #e42f1c;
+}
+
+/* Messaggi */
+.msg {
+    margin-left: 20px;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    display: none;
+}
+
+.msg.ok {
+    border: 1px solid #2e7d32;
+    color: #2e7d32;
+}
+
+.msg.err {
+    border: 1px solid #c62828;
+    color: #c62828;
+}
+
+/* Tabella */
+table {
+    width: 95%;
+    max-width: 1300px;
+    margin-left: 20px;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background: rgba(0,13,29,0.85);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+th {
+    background: rgba(228,47,28,0.85);
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Azioni */
+button {
+    background: linear-gradient(135deg, #000d1d, #e42f1c);
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(228,47,28,0.5);
+}
+
+/* Home & Logout */
+.home-btn, .logout-btn {
+    position: fixed;
+    right: 20px;
+    background: linear-gradient(135deg, #000d1d, #e42f1c);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 20px rgba(228,47,28,0.5);
+    transition: all 0.3s ease;
+}
+
+.home-btn {
+    bottom: 70px;
+}
+
+.logout-btn {
+    bottom: 20px;
+}
+
+.home-btn:hover, .logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(228,47,28,0.6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 2rem;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    th, td {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+}

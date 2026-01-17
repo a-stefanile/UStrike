@@ -1,6 +1,7 @@
 package com.ustrike.model.dao;
 
 import com.ustrike.model.dto.Prenotazione;
+import com.ustrike.model.dto.PrenotazioneView;
 import com.ustrike.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,12 +9,17 @@ import java.util.List;
 
 public class PrenotazioneDAO {
 
-    public void insertPrenotazione(Timestamp data, Timestamp orario, String stato, 
-                                   String partecipanti, int idServizio, int idRisorsa, 
-                                   int idCliente, Integer idStaff) throws SQLException {
-        String SQL = "INSERT INTO Prenotazione (Data, Orario, StatoPrenotazione, Partecipanti, IDServizio, IDRisorsa, IDCliente, IDStaff) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    public int insertPrenotazione(Timestamp data, Timestamp orario, String stato,
+                                  String partecipanti, int idServizio, int idRisorsa,
+                                  int idCliente, Integer idStaff) throws SQLException {
+
+        String sql = "INSERT INTO Prenotazione " +
+                "(Data, Orario, StatoPrenotazione, Partecipanti, IDServizio, IDRisorsa, IDCliente, IDStaff) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setTimestamp(1, data);
             ps.setTimestamp(2, orario);
             ps.setString(3, stato);
@@ -21,37 +27,43 @@ public class PrenotazioneDAO {
             ps.setInt(5, idServizio);
             ps.setInt(6, idRisorsa);
             ps.setInt(7, idCliente);
-            if (idStaff != null) {
-                ps.setInt(8, idStaff);
-            } else {
-                ps.setNull(8, Types.INTEGER);
+            if (idStaff != null) ps.setInt(8, idStaff);
+            else ps.setNull(8, Types.INTEGER);
+
+            int rows = ps.executeUpdate();
+            if (rows <= 0) return -1;
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : -1;
             }
-            ps.executeUpdate();
         }
     }
 
     public Prenotazione selectPrenotazione(int idPrenotazione) throws SQLException {
-        String SQL = "SELECT * FROM Prenotazione WHERE IDPrenotazione = ?;";
+        String sql = "SELECT * FROM Prenotazione WHERE IDPrenotazione = ?";
+
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
             ps.setInt(1, idPrenotazione);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapResultSetToPrenotazione(rs);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapResultSetToPrenotazione(rs) : null;
             }
         }
-        return null;
     }
 
     public List<Prenotazione> selectPrenotazioniByCliente(int idCliente) throws SQLException {
         List<Prenotazione> prenotazioni = new ArrayList<>();
-        String SQL = "SELECT * FROM Prenotazione WHERE IDCliente = ? ORDER BY Orario DESC;";
+        String sql = "SELECT * FROM Prenotazione WHERE IDCliente = ? ORDER BY Data DESC, Orario DESC";
+
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setInt(1, idCliente);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                prenotazioni.add(mapResultSetToPrenotazione(rs));
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, idCliente); // ✅ mancava nel tuo file
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) prenotazioni.add(mapResultSetToPrenotazione(rs));
             }
         }
         return prenotazioni;
@@ -59,93 +71,121 @@ public class PrenotazioneDAO {
 
     public List<Prenotazione> selectPrenotazioniInAttesa() throws SQLException {
         List<Prenotazione> prenotazioni = new ArrayList<>();
-        String SQL = "SELECT * FROM Prenotazione WHERE StatoPrenotazione = 'In attesa' ORDER BY Orario ASC;";
+        String sql = "SELECT * FROM Prenotazione WHERE StatoPrenotazione = 'In attesa' ORDER BY Data ASC, Orario ASC";
+
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                prenotazioni.add(mapResultSetToPrenotazione(rs));
-            }
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) prenotazioni.add(mapResultSetToPrenotazione(rs));
         }
         return prenotazioni;
     }
 
-    public List<Prenotazione> selectPrenotazioniByServizio(int idServizio) throws SQLException {
+    public List<Prenotazione> selectPrenotazioniCompletate() throws SQLException {
         List<Prenotazione> prenotazioni = new ArrayList<>();
-        String SQL = "SELECT * FROM Prenotazione WHERE IDServizio = ? AND StatoPrenotazione = 'Confermata' ORDER BY Orario ASC;";
+        String sql = "SELECT * FROM Prenotazione " +
+                     "WHERE StatoPrenotazione IN ('Confermata', 'Rifiutata') " +
+                     "ORDER BY Data DESC, Orario DESC";
+
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setInt(1, idServizio);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                prenotazioni.add(mapResultSetToPrenotazione(rs));
-            }
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) prenotazioni.add(mapResultSetToPrenotazione(rs));
         }
         return prenotazioni;
+    }
+
+    public List<Prenotazione> selectAllPrenotazioni() throws SQLException {
+        List<Prenotazione> tutte = new ArrayList<>();
+        String sql = "SELECT * FROM Prenotazione ORDER BY Data DESC, Orario ASC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) tutte.add(mapResultSetToPrenotazione(rs));
+        }
+        return tutte;
     }
 
     public boolean updateStatoPrenotazione(int idPrenotazione, String nuovoStato, Integer idStaff) throws SQLException {
-        String SQL = "UPDATE Prenotazione SET StatoPrenotazione = ?, IDStaff = ? WHERE IDPrenotazione = ?;";
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setString(1, nuovoStato);
-            if (idStaff != null) {
-                ps.setInt(2, idStaff);
-            } else {
-                ps.setNull(2, Types.INTEGER);
-            }
-            ps.setInt(3, idPrenotazione);
-            return ps.executeUpdate() > 0;
-        }
-    }
+        // ✅ Protezione: si può gestire solo se era ancora "In attesa"
+        String sql = "UPDATE Prenotazione SET StatoPrenotazione = ?, IDStaff = ? " +
+                     "WHERE IDPrenotazione = ? AND StatoPrenotazione = 'In attesa'";
 
-    public boolean deletePrenotazione(int idPrenotazione) throws SQLException {
-        String SQL = "DELETE FROM Prenotazione WHERE IDPrenotazione = ?;";
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setInt(1, idPrenotazione);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, nuovoStato);
+            if (idStaff != null) ps.setInt(2, idStaff);
+            else ps.setNull(2, Types.INTEGER);
+            ps.setInt(3, idPrenotazione);
+
             return ps.executeUpdate() > 0;
         }
     }
 
     private Prenotazione mapResultSetToPrenotazione(ResultSet rs) throws SQLException {
+        Integer idStaff = (rs.getObject("IDStaff") != null) ? rs.getInt("IDStaff") : null;
+
         return new Prenotazione(
-            rs.getInt("IDPrenotazione"),
-            rs.getTimestamp("Data"),
-            rs.getTimestamp("Orario"),
-            rs.getString("StatoPrenotazione"),
-            rs.getString("Partecipanti"),
-            rs.getInt("IDServizio"),
-            rs.getInt("IDRisorsa"),
-            rs.getInt("IDCliente"),
-            rs.getObject("IDStaff") != null ? rs.getInt("IDStaff") : null
+                rs.getInt("IDPrenotazione"),
+                rs.getTimestamp("Data"),
+                rs.getTimestamp("Orario"),
+                rs.getString("StatoPrenotazione"),
+                rs.getString("Partecipanti"),
+                rs.getInt("IDServizio"),
+                rs.getInt("IDRisorsa"),
+                rs.getInt("IDCliente"),
+                idStaff
         );
     }
     
-    public List<Prenotazione> selectPrenotazioniCompletate() throws SQLException {
-        List<Prenotazione> prenotazioni = new ArrayList<>();
-        String SQL = "SELECT * FROM Prenotazione WHERE StatoPrenotazione IN ('Confermata', 'Rifiutata') ORDER BY Orario DESC;";
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                prenotazioni.add(mapResultSetToPrenotazione(rs));
+    public List<PrenotazioneView> selectPrenotazioniByClienteView(int idCliente) throws Exception {
+        List<PrenotazioneView> list = new ArrayList<>();
+
+        String sql =
+            "SELECT p.IDPrenotazione, p.Data, p.Orario, p.StatoPrenotazione, p.Partecipanti, " +
+            "       p.IDServizio, s.NomeServizio, " +
+            "       p.IDRisorsa, r.Capacita AS CapacitaRisorsa, " +
+            "       p.IDStaff " +
+            "FROM Prenotazione p " +
+            "INNER JOIN Servizio s ON s.IDServizio = p.IDServizio " +
+            "INNER JOIN Risorsa  r ON r.IDRisorsa  = p.IDRisorsa " +
+            "WHERE p.IDCliente = ? " +
+            "ORDER BY p.Orario DESC";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idCliente);
+
+            try (ResultSet rs = ps.executeQuery()) { // executeQuery per SELECT [web:426]
+                while (rs.next()) {
+                    PrenotazioneView v = new PrenotazioneView();
+                    v.setIDPrenotazione(rs.getInt("IDPrenotazione"));
+                    v.setData(rs.getTimestamp("Data"));
+                    v.setOrario(rs.getTimestamp("Orario"));
+                    v.setStatoPrenotazione(rs.getString("StatoPrenotazione"));
+                    v.setPartecipanti(rs.getString("Partecipanti"));
+
+                    v.setIDServizio(rs.getInt("IDServizio"));
+                    v.setNomeServizio(rs.getString("NomeServizio"));
+
+                    v.setIDRisorsa(rs.getInt("IDRisorsa"));
+                    v.setCapacitaRisorsa(rs.getInt("CapacitaRisorsa"));
+
+                    int staff = rs.getInt("IDStaff");
+                    v.setIDStaff(rs.wasNull() ? null : staff);
+
+                    list.add(v);
+                }
             }
         }
-        return prenotazioni;
+
+        return list;
     }
-    
-    public List<Prenotazione> selectAllPrenotazioni() throws SQLException {
-        List<Prenotazione> tutte = new ArrayList<>();
-        String SQL = "SELECT * FROM Prenotazione ORDER BY Data DESC, Orario ASC;";
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(SQL);
-             ResultSet rs = ps.executeQuery()) {
-            
-            while (rs.next()) {
-                tutte.add(mapResultSetToPrenotazione(rs));
-            }
-        }
-        return tutte;
-    }
+
 }

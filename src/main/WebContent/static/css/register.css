@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+/* Reset base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body e sfondo */
+body {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url('../images/27263.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    overflow: auto; /* Cambiato da hidden per abilitare scroll */
+    padding: 20px;
+    color: #ffffff;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(11,15,22,0.85),
+        rgba(11,15,22,0.65)
+    );
+    z-index: 1;
+}
+
+/* Form Card - spostato qui per contenere tutto */
+form {
+    background: rgba(30, 36, 45, 0.85);
+    border: 1px solid rgba(255, 90, 50, 0.25);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow:
+        0 20px 40px rgba(0,0,0,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.04);
+    position: relative;
+    z-index: 2;
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Float animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Titolo */
+h1 {
+    text-align: center;
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Label */
+label {
+    display: block;
+    color: #cfd8dc;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Input UNIFORME per TUTTI i tipi (text, email, password) */
+input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2aa9ff;
+    box-shadow: 0 0 0 2px rgba(42,169,255,0.25);
+    background: rgba(255,255,255,0.12);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #000d1d, #e42f1c);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 30px rgba(42,169,255,0.35);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 45px rgba(42,169,255,0.55);
+}
+
+/* Messaggi di errore e successo */
+.error {
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #ff6b6b;
+    text-align: center;
+}
+
+.success {
+    background: rgba(0, 255, 0, 0.2);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #51cf66;
+    text-align: center;
+}
+
+/* Link registrazione */
+.register-link {
+    text-align: center;
+    color: #cfd8dc;
+    margin-top: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.register-link a {
+    color: #e42f1c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    color: #ff5a32;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    form {
+        padding: 30px 20px;
+        margin: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+
+/* Logo in alto a sinistra */
+.logo {
+    position: fixed;
+    top: 70px;
+    right: 25px;
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+    height: 50px; /* stessa altezza hamburger */
+}
+
+
+.logo img {
+    height: 300px;
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.logo img:hover {
+    transform: scale(1.05);
+}
