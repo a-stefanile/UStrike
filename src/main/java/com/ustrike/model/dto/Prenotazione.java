@@ -14,12 +14,22 @@ public class Prenotazione implements Serializable {
     private int IDServizio;
     private int IDRisorsa;
     private int IDCliente;
-    private Integer IDStaff;
+    private Integer IDStaff;     // nullable
+    private String noteStaff;    // nullable
 
-    public Prenotazione() {}
+    public Prenotazione() {
+    }
 
-    public Prenotazione(int IDPrenotazione, Timestamp data, Timestamp orario, String statoPrenotazione,
-                        String partecipanti, int IDServizio, int IDRisorsa, int IDCliente, Integer IDStaff) {
+    public Prenotazione(int IDPrenotazione,
+                        Timestamp data,
+                        Timestamp orario,
+                        String statoPrenotazione,
+                        String partecipanti,
+                        int IDServizio,
+                        int IDRisorsa,
+                        int IDCliente,
+                        Integer IDStaff,
+                        String noteStaff) {
         this.IDPrenotazione = IDPrenotazione;
         this.data = data;
         this.orario = orario;
@@ -29,32 +39,86 @@ public class Prenotazione implements Serializable {
         this.IDRisorsa = IDRisorsa;
         this.IDCliente = IDCliente;
         this.IDStaff = IDStaff;
+        this.noteStaff = noteStaff;
     }
 
-    public int getIDPrenotazione() { return IDPrenotazione; }
-    public void setIDPrenotazione(int iDPrenotazione) { IDPrenotazione = iDPrenotazione; }
+    public int getIDPrenotazione() {
+        return IDPrenotazione;
+    }
 
-    public Timestamp getData() { return data; }
-    public void setData(Timestamp data) { this.data = data; }
+    public void setIDPrenotazione(int iDPrenotazione) {
+        IDPrenotazione = iDPrenotazione;
+    }
 
-    public Timestamp getOrario() { return orario; }
-    public void setOrario(Timestamp orario) { this.orario = orario; }
+    public Timestamp getData() {
+        return data;
+    }
 
-    public String getStatoPrenotazione() { return statoPrenotazione; }
-    public void setStatoPrenotazione(String statoPrenotazione) { this.statoPrenotazione = statoPrenotazione; }
+    public void setData(Timestamp data) {
+        this.data = data;
+    }
 
-    public String getPartecipanti() { return partecipanti; }
-    public void setPartecipanti(String partecipanti) { this.partecipanti = partecipanti; }
+    public Timestamp getOrario() {
+        return orario;
+    }
 
-    public int getIDServizio() { return IDServizio; }
-    public void setIDServizio(int iDServizio) { IDServizio = iDServizio; }
+    public void setOrario(Timestamp orario) {
+        this.orario = orario;
+    }
 
-    public int getIDRisorsa() { return IDRisorsa; }
-    public void setIDRisorsa(int iDRisorsa) { IDRisorsa = iDRisorsa; }
+    public String getStatoPrenotazione() {
+        return statoPrenotazione;
+    }
 
-    public int getIDCliente() { return IDCliente; }
-    public void setIDCliente(int iDCliente) { IDCliente = iDCliente; }
+    public void setStatoPrenotazione(String statoPrenotazione) {
+        this.statoPrenotazione = statoPrenotazione;
+    }
 
-    public Integer getIDStaff() { return IDStaff; }
-    public void setIDStaff(Integer iDStaff) { IDStaff = iDStaff; }
+    public String getPartecipanti() {
+        return partecipanti;
+    }
+
+    public void setPartecipanti(String partecipanti) {
+        this.partecipanti = partecipanti;
+    }
+
+    public int getIDServizio() {
+        return IDServizio;
+    }
+
+    public void setIDServizio(int iDServizio) {
+        IDServizio = iDServizio;
+    }
+
+    public int getIDRisorsa() {
+        return IDRisorsa;
+    }
+
+    public void setIDRisorsa(int iDRisorsa) {
+        IDRisorsa = iDRisorsa;
+    }
+
+    public int getIDCliente() {
+        return IDCliente;
+    }
+
+    public void setIDCliente(int iDCliente) {
+        IDCliente = iDCliente;
+    }
+
+    public Integer getIDStaff() {
+        return IDStaff;
+    }
+
+    public void setIDStaff(Integer iDStaff) {
+        IDStaff = iDStaff;
+    }
+
+    public String getNoteStaff() {
+        return noteStaff;
+    }
+
+    public void setNoteStaff(String noteStaff) {
+        this.noteStaff = noteStaff;
+    }
 }

@@ -18,7 +18,11 @@ public class PrenotazioneView implements Serializable {
     private int IDRisorsa;
     private int capacitaRisorsa;
 
-    private Integer IDStaff;
+    private Integer IDStaff;   // nullable
+    private String noteStaff;  // nullable (motivo rifiuto / nota staff)
+
+    public PrenotazioneView() {
+    }
 
     public int getIDPrenotazione() { return IDPrenotazione; }
     public void setIDPrenotazione(int IDPrenotazione) { this.IDPrenotazione = IDPrenotazione; }
@@ -49,4 +53,7 @@ public class PrenotazioneView implements Serializable {
 
     public Integer getIDStaff() { return IDStaff; }
     public void setIDStaff(Integer IDStaff) { this.IDStaff = IDStaff; }
+
+    public String getNoteStaff() { return noteStaff; }
+    public void setNoteStaff(String noteStaff) { this.noteStaff = noteStaff; }
 }
