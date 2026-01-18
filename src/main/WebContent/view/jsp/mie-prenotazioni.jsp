@@ -18,20 +18,18 @@
   <meta charset="UTF-8">
   <title>Le mie prenotazioni</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/mie-prenotazioni.css">
+  <link rel="stylesheet" href="<%= ctx %>/static/css/mie-prenotazioni.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
 
-<!-- Logo in alto a destra -->
 <div class="logo">
-    <img src="${pageContext.request.contextPath}/static/images/logo.png" alt="UStrike Logo">
+  <img src="<%= ctx %>/static/images/logo.png" alt="UStrike Logo">
 </div>
 
 <h2>Le mie prenotazioni</h2>
 
-<!-- Pulsante sempre visibile -->
-<a href="${pageContext.request.contextPath}/cliente/crea-prenotazione" class="btn-prenota new-pren-btn">Nuova prenotazione</a>
+<a href="<%= ctx %>/cliente/crea-prenotazione" class="btn-prenota new-pren-btn">Nuova prenotazione</a>
 
 <% if (prenotazioni.isEmpty()) { %>
   <p class="no-pren">Nessuna prenotazione presente.</p>
@@ -48,12 +46,14 @@
       <th>Capacità</th>
       <th>Stato</th>
       <th>Partecipanti</th>
+      <th>Motivo rifiuto</th>
     </tr>
   </thead>
 
   <tbody>
     <% for (PrenotazioneView p : prenotazioni) {
          String stato = (p.getStatoPrenotazione() == null) ? "-" : p.getStatoPrenotazione();
+
          String cls = "badge";
          if ("Confermata".equalsIgnoreCase(stato)) cls += " ok";
          else if ("In attesa".equalsIgnoreCase(stato)) cls += " warn";
@@ -61,6 +61,12 @@
 
          String dataStr = (p.getData() == null) ? "-" : dfDate.format(p.getData());
          String oraStr  = (p.getOrario() == null) ? "-" : dfTime.format(p.getOrario());
+
+         String note = (p.getNoteStaff() == null) ? "" : p.getNoteStaff().trim();
+         String motivoDaMostrare = "-";
+         if ("Rifiutata".equalsIgnoreCase(stato) && !note.isEmpty()) {
+           motivoDaMostrare = note;
+         }
     %>
       <tr>
         <td><%= p.getIDPrenotazione() %></td>
@@ -71,6 +77,7 @@
         <td><%= p.getCapacitaRisorsa() %></td>
         <td><span class="<%= cls %>"><%= stato %></span></td>
         <td><%= p.getPartecipanti() %></td>
+        <td><%= motivoDaMostrare %></td>
       </tr>
     <% } %>
   </tbody>
@@ -78,14 +85,12 @@
 
 <% } %>
 
-<!-- Bottone per tornare alla Home Cliente -->
-<a href="${pageContext.request.contextPath}/cliente/home" class="home-btn">
-    <i class="fas fa-home"></i> Home
+<a href="<%= ctx %>/cliente/home" class="home-btn">
+  <i class="fas fa-home"></i> Home
 </a>
 
-<!-- Logout con icona -->
-<a href="${pageContext.request.contextPath}/logout" class="logout-btn">
-    <i class="fas fa-sign-out-alt"></i> Logout
+<a href="<%= ctx %>/logout" class="logout-btn">
+  <i class="fas fa-sign-out-alt"></i> Logout
 </a>
 
 </body>

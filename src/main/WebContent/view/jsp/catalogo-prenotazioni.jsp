@@ -5,7 +5,8 @@
 <%
     String ctx = request.getContextPath();
     String filter = (String) request.getAttribute("filter");
-    List<Prenotazione> prenotazioni = (List<Prenotazione>)request.getAttribute("prenotazioni");
+    if (filter == null) filter = "inAttesa";
+    List<Prenotazione> prenotazioni = (List<Prenotazione>) request.getAttribute("prenotazioni");
 %>
 
 <!DOCTYPE html>
@@ -14,7 +15,13 @@
     <meta charset="UTF-8">
     <title>UStrike - Dashboard Staff</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-	<link rel="stylesheet" href="<%= ctx %>/static/css/dashboard.css">
+    <link rel="stylesheet" href="<%= ctx %>/static/css/dashboard.css">
+
+    <style>
+        .rifiuto-box { display: none; margin-top: 6px; }
+        .rifiuto-box select { max-width: 220px; }
+        .rifiuto-box button { margin-left: 6px; }
+    </style>
 </head>
 <body>
 
@@ -26,8 +33,8 @@
     <h2>Dashboard Staff - Catalogo Prenotazioni</h2>
 
     <div class="filter-bar">
-        <a href="<%= ctx %>/staff/catalogo?filter=inAttesa">In attesa</a>
-        <a href="<%= ctx %>/staff/catalogo?filter=completate">Completate</a>
+        <a href="<%= ctx %>/staff/catalogo?filter=In attesa">In attesa</a>
+        <a href="<%= ctx %>/staff/catalogo?filter=Completate">Completate</a>
         <a href="<%= ctx %>/staff/catalogo?filter=all">Tutte</a>
     </div>
 
@@ -36,9 +43,7 @@
     </p>
 </div>
 
-
 <div id="msg" class="msg"></div>
-
 
 <table>
     <thead>
@@ -65,23 +70,37 @@
         } else {
             for (Prenotazione p : prenotazioni) {
                 int id = p.getIDPrenotazione();
-                String stato = p.getStatoPrenotazione();
                 Integer idStaff = p.getIDStaff();
     %>
         <tr>
             <td><%= id %></td>
             <td><%= p.getData() %></td>
             <td><%= p.getOrario() %></td>
-            <td><%= stato %></td>
+            <td><%= p.getStatoPrenotazione() %></td>
             <td><%= p.getIDServizio() %></td>
             <td><%= p.getIDRisorsa() %></td>
             <td><%= p.getIDCliente() %></td>
             <td><%= (idStaff != null ? idStaff : "-") %></td>
             <td><%= p.getPartecipanti() %></td>
+
             <td>
                 <% if ("inAttesa".equalsIgnoreCase(filter)) { %>
-                    <button type="button" onclick="updateStato(<%= id %>, 'accetta')">Accetta</button>
-                    <button type="button" onclick="updateStato(<%= id %>, 'rifiuta')">Rifiuta</button>
+                    <button type="button" class="btn-accetta" data-id="<%= id %>">Accetta</button>
+
+                    <button type="button" class="btn-rifiuta" data-id="<%= id %>">Rifiuta</button>
+
+                    <div id="rifiuto-box-<%= id %>" class="rifiuto-box">
+                        <select id="motivo-<%= id %>">
+                            <option value="">-- Seleziona motivo --</option>
+                            <option value="Fascia oraria occupata">Fascia oraria occupata</option>
+                            <option value="Giornata non disponibile">Giornata non disponibile</option>
+                            <option value="Risorse non disponibili">Risorse non disponibili</option>
+                            <option value="Servizio fuori servizio">Servizio fuori servizio</option>
+                        </select>
+
+                        <button type="button" class="btn-conferma-rifiuto" data-id="<%= id %>">Conferma rifiuto</button>
+                        <button type="button" class="btn-annulla-rifiuto" data-id="<%= id %>">Annulla</button>
+                    </div>
                 <% } else { %>
                     -
                 <% } %>
@@ -94,47 +113,15 @@
     </tbody>
 </table>
 
-<script>
-function showMsg(text, ok) {
-    const el = document.getElementById("msg");
-    el.textContent = text;
-    el.className = "msg " + (ok ? "ok" : "err");
-    el.style.display = "block";
-}
-
-async function updateStato(idPrenotazione, action) {
-    const body = new URLSearchParams();
-    body.append("action", action);
-    body.append("idPrenotazione", String(idPrenotazione));
-
-    try {
-        const res = await fetch("<%= ctx %>/staff/catalogo", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: body.toString()
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            showMsg("Operazione completata.", true);
-            setTimeout(() => {
-                window.location.href = "<%= ctx %>/staff/catalogo?filter=<%= filter %>";
-            }, 300);
-        } else {
-            showMsg(data.error || "Operazione fallita.", false);
-        }
-    } catch (e) {
-        showMsg("Errore di comunicazione col server.", false);
-    }
-}
-</script>
-
-
-
 <a href="<%= ctx %>/logout" class="logout-btn">
     <i class="fas fa-sign-out-alt"></i> Logout
 </a>
 
+<script>
+  window.USTRIKE_CTX = "<%= ctx %>";
+  window.USTRIKE_FILTER = "<%= filter %>";
+</script>
+
+<script src="${pageContext.request.contextPath}/static/JavaScript/dashboard.js"></script>
 </body>
 </html>
