@@ -22,8 +22,18 @@ import java.util.List;
 public class RisorseDisponibiliServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private final RisorsaService risorsaService = new RisorsaService();
+    //private final RisorsaService risorsaService = new RisorsaService();
 
+    private RisorsaService risorsaService;
+    
+    public RisorseDisponibiliServlet() {
+    	this.risorsaService = new RisorsaService();
+    }
+    
+    public RisorseDisponibiliServlet(RisorsaService risorsaService) {
+    	this.risorsaService = risorsaService;
+    }
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
