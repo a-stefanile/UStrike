@@ -23,9 +23,24 @@ import java.util.List;
 public class CreaPrenotazioneServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final PrenotazioneService prenotazioneService = new PrenotazioneService();
-    private final ServizioService servizioService = new ServizioService();
-    private final RisorsaService risorsaService = new RisorsaService();
+    //private final PrenotazioneService prenotazioneService = new PrenotazioneService();
+    //private final ServizioService servizioService = new ServizioService();
+    //private final RisorsaService risorsaService = new RisorsaService();
+	private PrenotazioneService prenotazioneService;
+	private ServizioService servizioService;
+	private RisorsaService risorsaService;
+	
+    public CreaPrenotazioneServlet() {
+    	this.prenotazioneService = new PrenotazioneService();
+    	this.servizioService = new ServizioService();
+    	this.risorsaService = new RisorsaService();
+    }
+    
+    public CreaPrenotazioneServlet(PrenotazioneService p, ServizioService s, RisorsaService r) {
+    	this.prenotazioneService = p;
+    	this.servizioService = s;
+    	this.risorsaService =r;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
