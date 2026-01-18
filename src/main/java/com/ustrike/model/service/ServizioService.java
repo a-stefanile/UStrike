@@ -7,9 +7,19 @@ import java.util.List;
 
 public class ServizioService {
 
-    private final ServizioDAO dao = new ServizioDAO();
+	private ServizioDAO dao; 
 
-    // 📋 CLIENTE: servizi abilitati
+    // Costruttore standard per l'app
+    public ServizioService() {
+        this.dao = new ServizioDAO();
+    }
+
+    // Costruttore per il test
+    public ServizioService(ServizioDAO dao) {
+        this.dao = dao;
+    }
+
+    // ðŸ“‹ CLIENTE: servizi abilitati
     public List<Servizio> getServiziAbilitati() {
         try {
             return dao.doRetrieveEnabled();
@@ -18,7 +28,7 @@ public class ServizioService {
         }
     }
 
-    // 📋 STAFF/MANAGER: tutti i servizi
+    // ðŸ“‹ STAFF/MANAGER: tutti i servizi
     public List<Servizio> getTuttiIServizi() {
         try {
             return dao.doRetrieveAll();
@@ -27,7 +37,7 @@ public class ServizioService {
         }
     }
 
-    // 🔍 DETTAGLIO PER ID
+    // ðŸ”� DETTAGLIO PER ID
     public Servizio getServizioById(int idServizio) {
         try {
             return dao.doRetrieveByKey(idServizio);
@@ -36,7 +46,7 @@ public class ServizioService {
         }
     }
 
-    // 🔍 DETTAGLIO PER NOME (Bowling / Go-Kart / Biliardo)
+    // ðŸ”� DETTAGLIO PER NOME (Bowling / Go-Kart / Biliardo)
     public Servizio getServizioByNome(String nomeServizio) {
         try {
             return dao.doRetrieveByNome(nomeServizio);
@@ -45,7 +55,7 @@ public class ServizioService {
         }
     }
 
-    // ✅ STAFF: abilita servizio
+    // âœ… STAFF: abilita servizio
     public boolean abilitaServizio(int idServizio) {
         try {
             Servizio s = dao.doRetrieveByKey(idServizio);
@@ -60,7 +70,7 @@ public class ServizioService {
         }
     }
 
-    // ❌ STAFF: disabilita servizio
+    // â�Œ STAFF: disabilita servizio
     public boolean disabilitaServizio(int idServizio) {
         try {
             Servizio s = dao.doRetrieveByKey(idServizio);
