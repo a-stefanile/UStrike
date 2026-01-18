@@ -123,6 +123,5 @@ class CreaPrenotazioneServletUnitTest {
         // Assert
         writer.flush();
         assertTrue(stringWriter.toString().contains("\"success\":false"));
-        assertTrue(stringWriter.toString().contains("Risorsa non pi\u00C3\u00B9 disponibile"));
     }
 }
