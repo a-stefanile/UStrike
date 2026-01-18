@@ -21,12 +21,20 @@ public class LoginServlet extends HttpServlet {
     private static final String ERROR_ACCESSO_NEGATO = "accesso-negato";
 
     private UserService userService;
-
+/*
     @Override
     public void init() throws ServletException {
         this.userService = new UserService();
     }
-
+*/
+    
+    public LoginServlet() {
+    	this.userService = new  UserService();
+    }
+    
+    public LoginServlet(UserService userService) {
+    	this.userService = userService;
+    }
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
