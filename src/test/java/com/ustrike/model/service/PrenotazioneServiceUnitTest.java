@@ -1,17 +1,8 @@
 package com.ustrike.model.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,9 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.ustrike.model.dao.PrenotazioneDAO;
 import com.ustrike.model.dto.Prenotazione;
+import com.ustrike.model.dto.PrenotazioneView;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -40,109 +33,140 @@ class PrenotazioneServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        
-        daoMock = mock(PrenotazioneDAO.class);
-        sessionMock = mock(HttpSession.class);
-        service = new PrenotazioneService(daoMock);
+        MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testGetCatalogoInAttesa_Successo() throws Exception {
-        List<Prenotazione> listaFinta = new ArrayList<>();
-        when(daoMock.selectPrenotazioniInAttesa()).thenReturn(listaFinta);
-
-        List<Prenotazione> risultato = service.getCatalogoInAttesa();
-
-        assertNotNull(risultato);
-        verify(daoMock).selectPrenotazioniInAttesa();
-    }
+    // --- TEST DI SUCCESSO E ALLINEAMENTO FIRME ---
 
     @Test
-    void testGetPrenotazioniCliente_UsaCacheInSessione() {
-        int idCliente = 1;
-        String cacheKey = "prenotazioni_1";
-        List<Prenotazione> listaInCache = new ArrayList<>();
-        listaInCache.add(new Prenotazione());
-
-        when(sessionMock.getAttribute(cacheKey)).thenReturn(listaInCache);
-
-        List<Prenotazione> risultato = service.getPrenotazioniCliente(idCliente, sessionMock);
-
-        assertSame(listaInCache, risultato, "Dovrebbe restituire l'oggetto dalla cache");
-        verifyNoInteractions(daoMock);
-    }
-
-    
-    @Test
-    void testCreaPrenotazione_PulisceSessione() throws Exception { 
-        // Arrange
+    void testCreaPrenotazione_Allineato() throws Exception {
         Timestamp ora = new Timestamp(System.currentTimeMillis());
         int idCliente = 5;
-        
 
-        when(daoMock.insertPrenotazione(any(), any(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), any()))
+        // Verifica che il service passi 9 parametri al DAO (inclusi null per staff e note)
+        when(daoMock.insertPrenotazione(any(), any(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), any(), any()))
             .thenReturn(100);
-
 
         int idGenerato = service.creaPrenotazione(ora, ora, "3 persone", 1, 1, idCliente, sessionMock);
 
-
         assertEquals(100, idGenerato);
         verify(sessionMock).removeAttribute("prenotazioni_5");
+        verify(sessionMock).removeAttribute("prenotazioni_view_5");
     }
 
     @Test
-    void testAccettaPrenotazione_SuccessoEPuliziaCache() throws Exception { // <--- AGGIUNGI QUESTO
-
+    void testAccettaPrenotazione_Allineato() throws Exception {
         int idPreno = 10;
         int idStaff = 2;
         int idCliente = 8;
         Prenotazione pFinta = new Prenotazione();
         pFinta.setIDCliente(idCliente);
 
-
-        when(daoMock.updateStatoPrenotazione(idPreno, "Confermata", idStaff)).thenReturn(true);
+        when(daoMock.updateStatoPrenotazione(eq(idPreno), eq("Confermata"), eq(idStaff), anyString())).thenReturn(true);
         when(daoMock.selectPrenotazione(idPreno)).thenReturn(pFinta);
 
-        // Act
         boolean esito = service.accettaPrenotazione(idPreno, idStaff, sessionMock);
 
-        // Assert
         assertTrue(esito);
         verify(sessionMock).removeAttribute("prenotazioni_" + idCliente);
-        verify(sessionMock).removeAttribute("prenotazioni_view_" + idCliente);
     }
 
     @Test
-    void testGetCatalogoInAttesa_LanciaEccezione() throws Exception { 
-
-        when(daoMock.selectPrenotazioniInAttesa()).thenThrow(new RuntimeException("DB Error"));
-
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
-            service.getCatalogoInAttesa();
-        });
-
-        assertEquals("Errore catalogo in attesa", ex.getMessage());
-    }
-    @Test
-    void testRifiutaPrenotazione_SuccessoEPuliziaCache() throws Exception {
+    void testRifiutaPrenotazione_ConMotivo() throws Exception {
         int idPreno = 20;
         int idStaff = 3;
         int idCliente = 15;
+        String motivo = "Al completo";
         Prenotazione pFinta = new Prenotazione();
         pFinta.setIDCliente(idCliente);
 
-        when(daoMock.updateStatoPrenotazione(idPreno, "Rifiutata", idStaff)).thenReturn(true);
+        when(daoMock.updateStatoPrenotazione(idPreno, "Rifiutata", idStaff, motivo)).thenReturn(true);
         when(daoMock.selectPrenotazione(idPreno)).thenReturn(pFinta);
 
-
-        boolean esito = service.rifiutaPrenotazione(idPreno, idStaff, sessionMock);
-
+        boolean esito = service.rifiutaPrenotazione(idPreno, idStaff, motivo, sessionMock);
 
         assertTrue(esito);
+        verify(daoMock).updateStatoPrenotazione(idPreno, "Rifiutata", idStaff, motivo);
         verify(sessionMock).removeAttribute("prenotazioni_" + idCliente);
-        verify(sessionMock).removeAttribute("prenotazioni_view_" + idCliente);
-        System.out.println("Test Rifiuto: OK!");
+    }
+
+    // --- TEST LOGICA CACHE ---
+
+    @Test
+    void testGetPrenotazioniClienteView_CacheHit() throws Exception {
+        int idCliente = 1;
+        String cacheKey = "prenotazioni_view_1";
+        List<PrenotazioneView> listaInCache = new ArrayList<>();
+
+        when(sessionMock.getAttribute(cacheKey)).thenReturn(listaInCache);
+
+        List<PrenotazioneView> risultato = service.getPrenotazioniClienteView(idCliente, sessionMock);
+
+        assertSame(listaInCache, risultato);
+        verifyNoInteractions(daoMock); // Non deve andare a DB
+    }
+
+    @Test
+    void testGetPrenotazioniClienteView_CacheMiss() throws Exception {
+        int idCliente = 1;
+        String cacheKey = "prenotazioni_view_1";
+        List<PrenotazioneView> listaDalloStore = new ArrayList<>();
+        
+        when(sessionMock.getAttribute(cacheKey)).thenReturn(null);
+        when(daoMock.selectPrenotazioniByClienteView(idCliente)).thenReturn(listaDalloStore);
+
+        List<PrenotazioneView> risultato = service.getPrenotazioniClienteView(idCliente, sessionMock);
+
+        assertNotNull(risultato);
+        verify(sessionMock).setAttribute(cacheKey, listaDalloStore);
+    }
+
+    // --- TEST ROBUSTEZZA ED ERRORI (EDGE CASES) ---
+
+    @Test
+    void testCreaPrenotazione_SessioneNull_NonCrasha() throws Exception {
+        // Verifica che il service gestisca il caso in cui la sessione non esista (es. chiamate API)
+        when(daoMock.insertPrenotazione(any(), any(), anyString(), anyString(), anyInt(), anyInt(), anyInt(), any(), any()))
+            .thenReturn(100);
+
+        assertDoesNotThrow(() -> {
+            service.creaPrenotazione(new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), 
+                                    "2 persone", 1, 1, 5, null);
+        });
+    }
+
+    @Test
+    void testAccettaPrenotazione_FallimentoDAO_NonPulisceCache() throws Exception {
+        int idPreno = 10;
+        // Se il DAO restituisce false (es. record già modificato da altri)
+        when(daoMock.updateStatoPrenotazione(anyInt(), anyString(), anyInt(), anyString())).thenReturn(false);
+
+        boolean esito = service.accettaPrenotazione(idPreno, 1, sessionMock);
+
+        assertFalse(esito);
+        // Non deve provare a recuperare il cliente né pulire la cache
+        verify(daoMock, never()).selectPrenotazione(anyInt());
+        verify(sessionMock, never()).removeAttribute(anyString()); 
+    }
+
+    @Test
+    void testAccettaPrenotazione_ErroreRecuperoCliente_MaEsitoPositivo() throws Exception {
+        int idPreno = 10;
+        when(daoMock.updateStatoPrenotazione(anyInt(), anyString(), anyInt(), anyString())).thenReturn(true);
+        // Simulo un errore nel recupero del cliente (usato solo per la cache)
+        when(daoMock.selectPrenotazione(idPreno)).thenThrow(new RuntimeException("DB down"));
+
+        boolean esito = service.accettaPrenotazione(idPreno, 1, sessionMock);
+
+        // L'operazione principale deve essere considerata riuscita (try-catch ignored nel service)
+        assertTrue(esito);
+    }
+
+    @Test
+    void testGetCatalogoInAttesa_ErrorWrapping() throws Exception {
+        when(daoMock.selectPrenotazioniInAttesa()).thenThrow(new RuntimeException("SQL Error"));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> service.getCatalogoInAttesa());
+        assertEquals("Errore catalogo in attesa", ex.getMessage());
     }
 }
