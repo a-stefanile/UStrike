@@ -27,11 +27,19 @@ public class RegistrazioneServlet extends HttpServlet {
 
     private UserService userService;
 
+    public RegistrazioneServlet() {
+    	this.userService = new UserService();
+    }
+    
+    public RegistrazioneServlet(UserService userService) {
+    	this.userService = userService;
+    }
+    /*
     @Override
     public void init() throws ServletException {
         userService = new UserService();
     }
-
+*/
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
