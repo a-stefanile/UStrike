@@ -3,6 +3,7 @@ package com.ustrike.model.dao;
 import com.ustrike.model.dto.Prenotazione;
 import com.ustrike.model.dto.PrenotazioneView;
 import com.ustrike.util.DBConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +12,11 @@ public class PrenotazioneDAO {
 
     public int insertPrenotazione(Timestamp data, Timestamp orario, String stato,
                                   String partecipanti, int idServizio, int idRisorsa,
-                                  int idCliente, Integer idStaff) throws SQLException {
+                                  int idCliente, Integer idStaff, String noteStaff) throws SQLException {
 
         String sql = "INSERT INTO Prenotazione " +
-                "(Data, Orario, StatoPrenotazione, Partecipanti, IDServizio, IDRisorsa, IDCliente, IDStaff) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "(Data, Orario, StatoPrenotazione, Partecipanti, IDServizio, IDRisorsa, IDCliente, IDStaff, NoteStaff) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -27,8 +28,12 @@ public class PrenotazioneDAO {
             ps.setInt(5, idServizio);
             ps.setInt(6, idRisorsa);
             ps.setInt(7, idCliente);
+
             if (idStaff != null) ps.setInt(8, idStaff);
-            else ps.setNull(8, Types.INTEGER);
+            else ps.setNull(8, Types.INTEGER); // NULL su FK staff [web:18]
+
+            if (noteStaff != null && !noteStaff.isBlank()) ps.setString(9, noteStaff);
+            else ps.setNull(9, Types.VARCHAR); // NULL su testo [web:16][web:23]
 
             int rows = ps.executeUpdate();
             if (rows <= 0) return -1;
@@ -60,7 +65,7 @@ public class PrenotazioneDAO {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setInt(1, idCliente); // ✅ mancava nel tuo file
+            ps.setInt(1, idCliente);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) prenotazioni.add(mapResultSetToPrenotazione(rs));
@@ -110,27 +115,40 @@ public class PrenotazioneDAO {
         return tutte;
     }
 
-    public boolean updateStatoPrenotazione(int idPrenotazione, String nuovoStato, Integer idStaff) throws SQLException {
-        // ✅ Protezione: si può gestire solo se era ancora "In attesa"
-        String sql = "UPDATE Prenotazione SET StatoPrenotazione = ?, IDStaff = ? " +
+    /**
+     * Aggiorna lo stato, l'ID dello staff che ha gestito la pratica e la nota (motivo).
+     * Nota: mantiene la guardia su "In attesa" per evitare doppie lavorazioni.
+     */
+    public boolean updateStatoPrenotazione(int idPrenotazione, String nuovoStato,
+                                          Integer idStaff, String notaStaff) throws SQLException {
+
+        String sql = "UPDATE Prenotazione " +
+                     "SET StatoPrenotazione = ?, IDStaff = ?, NoteStaff = ? " +
                      "WHERE IDPrenotazione = ? AND StatoPrenotazione = 'In attesa'";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, nuovoStato);
+
             if (idStaff != null) ps.setInt(2, idStaff);
-            else ps.setNull(2, Types.INTEGER);
-            ps.setInt(3, idPrenotazione);
+            else ps.setNull(2, Types.INTEGER); // NULL su intero [web:18]
+
+            if (notaStaff != null && !notaStaff.isBlank()) ps.setString(3, notaStaff);
+            else ps.setNull(3, Types.VARCHAR); // NULL su testo [web:16][web:23]
+
+            ps.setInt(4, idPrenotazione);
 
             return ps.executeUpdate() > 0;
         }
     }
 
     private Prenotazione mapResultSetToPrenotazione(ResultSet rs) throws SQLException {
-        Integer idStaff = (rs.getObject("IDStaff") != null) ? rs.getInt("IDStaff") : null;
+        // getInt su NULL torna 0, quindi meglio wasNull/getObject [web:22]
+        int staffInt = rs.getInt("IDStaff");
+        Integer idStaff = rs.wasNull() ? null : staffInt;
 
-        return new Prenotazione(
+        Prenotazione p = new Prenotazione(
                 rs.getInt("IDPrenotazione"),
                 rs.getTimestamp("Data"),
                 rs.getTimestamp("Orario"),
@@ -139,10 +157,13 @@ public class PrenotazioneDAO {
                 rs.getInt("IDServizio"),
                 rs.getInt("IDRisorsa"),
                 rs.getInt("IDCliente"),
-                idStaff
+                idStaff,
+                rs.getString("NoteStaff")
         );
+
+        return p;
     }
-    
+
     public List<PrenotazioneView> selectPrenotazioniByClienteView(int idCliente) throws Exception {
         List<PrenotazioneView> list = new ArrayList<>();
 
@@ -150,7 +171,7 @@ public class PrenotazioneDAO {
             "SELECT p.IDPrenotazione, p.Data, p.Orario, p.StatoPrenotazione, p.Partecipanti, " +
             "       p.IDServizio, s.NomeServizio, " +
             "       p.IDRisorsa, r.Capacita AS CapacitaRisorsa, " +
-            "       p.IDStaff " +
+            "       p.IDStaff, p.NoteStaff " +
             "FROM Prenotazione p " +
             "INNER JOIN Servizio s ON s.IDServizio = p.IDServizio " +
             "INNER JOIN Risorsa  r ON r.IDRisorsa  = p.IDRisorsa " +
@@ -162,7 +183,7 @@ public class PrenotazioneDAO {
 
             ps.setInt(1, idCliente);
 
-            try (ResultSet rs = ps.executeQuery()) { // executeQuery per SELECT [web:426]
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     PrenotazioneView v = new PrenotazioneView();
                     v.setIDPrenotazione(rs.getInt("IDPrenotazione"));
@@ -178,7 +199,9 @@ public class PrenotazioneDAO {
                     v.setCapacitaRisorsa(rs.getInt("CapacitaRisorsa"));
 
                     int staff = rs.getInt("IDStaff");
-                    v.setIDStaff(rs.wasNull() ? null : staff);
+                    v.setIDStaff(rs.wasNull() ? null : staff); // gestione NULL [web:22]
+
+                    v.setNoteStaff(rs.getString("NoteStaff"));
 
                     list.add(v);
                 }
@@ -187,5 +210,4 @@ public class PrenotazioneDAO {
 
         return list;
     }
-
 }
