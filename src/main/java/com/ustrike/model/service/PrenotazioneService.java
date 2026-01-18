@@ -9,7 +9,15 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class PrenotazioneService {
-    private final PrenotazioneDAO dao = new PrenotazioneDAO();
+    private  PrenotazioneDAO dao;
+    
+    public PrenotazioneService() {
+    	this.dao = new PrenotazioneDAO();
+    }
+    
+    public PrenotazioneService(PrenotazioneDAO dao) {
+    	this.dao = dao;
+    }
 
     public List<Prenotazione> getCatalogoInAttesa() {
         try {
