@@ -8,10 +8,20 @@ import com.ustrike.util.PasswordHasher;
 import java.sql.SQLException;
 
 public class UserService {
-    private final ClienteDAO clienteDAO = new ClienteDAO();
-    private final StaffDAO staffDAO = new StaffDAO();
+    private  ClienteDAO clienteDAO;
+    private  StaffDAO staffDAO;
     
-    // 🔐 LOGIN UNIFICATO (PBKDF2 salt:hash)
+    public UserService() {
+    	this.clienteDAO = new ClienteDAO();
+    	this.staffDAO = new StaffDAO();
+    }
+    
+    public UserService(ClienteDAO clienteDAO, StaffDAO staffDAO) {
+    	this.clienteDAO = clienteDAO;
+    	this.staffDAO = staffDAO;
+    }
+    
+    // ðŸ”� LOGIN UNIFICATO (PBKDF2 salt:hash)
     public Object authenticateUser(String email, String passwordPlain) throws SQLException {
         // 1. CLIENTE UC2
         Cliente cliente = clienteDAO.selectClienteByEmail(email);
@@ -28,28 +38,28 @@ public class UserService {
         return null;  // Login fallito
     }
     
-    // ➕ REGISTRAZIONE CLIENTE UC1
+    // âž• REGISTRAZIONE CLIENTE UC1
     public boolean createCliente(Cliente cliente, String passwordPlain) throws SQLException {
         // Email unica ODD
         if (clienteDAO.selectClienteByEmail(cliente.getEmail()) != null) {
             return false;
         }
         
-        cliente.setPasswordHash(PasswordHasher.hash(passwordPlain));  // ✅ PBKDF2 salt:hash
+        cliente.setPasswordHash(PasswordHasher.hash(passwordPlain));  // âœ… PBKDF2 salt:hash
         cliente.setPuntiTicket(0);
         return clienteDAO.insertCliente(cliente);
     }
     
-    // ➕ STAFF (admin)
+    // âž• STAFF (admin)
     public boolean createStaff(Staff staff, String passwordPlain) throws SQLException {
         if (staffDAO.emailExists(staff.getEmail())) {
             return false;
         }
-        staff.setPasswordHash(PasswordHasher.hash(passwordPlain));  // ✅ Uniforme
+        staff.setPasswordHash(PasswordHasher.hash(passwordPlain));  // âœ… Uniforme
         return staffDAO.doSave(staff);
     }
     
-    // ✏️ UPDATE PROFILO
+    // âœ�ï¸� UPDATE PROFILO
     public boolean updateUser(Object user, String ruolo) throws SQLException {
         if ("cliente".equalsIgnoreCase(ruolo) && user instanceof Cliente) {
             Cliente c = (Cliente) user;
@@ -60,7 +70,7 @@ public class UserService {
         return false;
     }
     
-    // 🔑 CHANGE PASSWORD (verifica old)
+    // ðŸ”‘ CHANGE PASSWORD (verifica old)
     public boolean changePassword(String email, String ruolo, String oldPlain, String newPlain) 
             throws SQLException {
         
@@ -78,7 +88,7 @@ public class UserService {
         return false;
     }
     
-    // 👤 GET BY ID
+    // ðŸ‘¤ GET BY ID
     public Object getUserById(int id, String ruolo) throws SQLException {
         if ("cliente".equalsIgnoreCase(ruolo)) {
             return clienteDAO.selectClienteById(id);
