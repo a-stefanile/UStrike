@@ -84,7 +84,7 @@
             <td><%= p.getPartecipanti() %></td>
 
             <td>
-                <% if ("inAttesa".equalsIgnoreCase(filter)) { %>
+                <% if ("In attesa".equalsIgnoreCase(filter)) { %>
                     <button type="button" class="btn-accetta" data-id="<%= id %>">Accetta</button>
 
                     <button type="button" class="btn-rifiuta" data-id="<%= id %>">Rifiuta</button>
@@ -95,7 +95,7 @@
                             <option value="Fascia oraria occupata">Fascia oraria occupata</option>
                             <option value="Giornata non disponibile">Giornata non disponibile</option>
                             <option value="Risorse non disponibili">Risorse non disponibili</option>
-                            <option value="Servizio fuori servizio">Servizio fuori servizio</option>
+                            <option value="Servizio fuori servizio">Servizio non disponibile</option>
                         </select>
 
                         <button type="button" class="btn-conferma-rifiuto" data-id="<%= id %>">Conferma rifiuto</button>

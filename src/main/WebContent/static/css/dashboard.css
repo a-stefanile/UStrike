@@ -179,3 +179,69 @@ button:hover {
         padding: 8px;
     }
 }
+
+/* ============================= */
+/*  MENU A TENDINA – STILE UI    */
+/* ============================= */
+
+.rifiuto-box {
+    display: none;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Select personalizzata */
+.rifiuto-box select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background: rgba(0,13,29,0.85);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+
+    padding: 8px 35px 8px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Hover */
+.rifiuto-box select:hover {
+    border-color: #e42f1c;
+}
+
+/* Focus */
+.rifiuto-box select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(228,47,28,0.5);
+}
+
+/* Opzioni dropdown */
+.rifiuto-box option {
+    background: #000d1d;
+    color: #ffffff;
+}
+
+/* ============================= */
+/*  BOTTONI RIFIUTO              */
+/* ============================= */
+
+.btn-conferma-rifiuto {
+    background: linear-gradient(135deg, #c62828, #e42f1c);
+}
+
+.btn-annulla-rifiuto {
+    background: linear-gradient(135deg, #000d1d, #555555);
+}
+
+.btn-annulla-rifiuto:hover {
+    box-shadow: 0 6px 15px rgba(255,255,255,0.3);
+}
