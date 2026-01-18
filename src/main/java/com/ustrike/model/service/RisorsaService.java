@@ -7,7 +7,17 @@ import java.util.List;
 
 public class RisorsaService {
 
-    private final RisorsaDAO dao = new RisorsaDAO();
+	private RisorsaDAO dao;
+
+    // 2. Costruttore standard
+    public RisorsaService() {
+        this.dao = new RisorsaDAO();
+    }
+
+    // 3. Costruttore per i test
+    public RisorsaService(RisorsaDAO dao) {
+        this.dao = dao;
+    }
 
     public int creaRisorsa(int stato, int capacita, int idServizio) {
         try {
