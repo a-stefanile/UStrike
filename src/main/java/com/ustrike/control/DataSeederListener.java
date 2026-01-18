@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-//SERVE A POPOLARE IL DB CON ACCOUNT STAFF DAL MOMENTO CHE NON GESTIAMO QUESTA OPERAZIONE
 @WebListener
 public class DataSeederListener implements ServletContextListener {
 
