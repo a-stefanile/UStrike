@@ -18,9 +18,20 @@ import java.util.List;
 public class StaffDashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final CatalogoPrenotazioni catalogo = CatalogoPrenotazioni.getInstance();
-    private final PrenotazioneDAO dao = new PrenotazioneDAO();
+    private  CatalogoPrenotazioni catalogo;
+    private  PrenotazioneDAO dao;
 
+    public StaffDashboardServlet() {
+    	super();
+    	this.catalogo = CatalogoPrenotazioni.getInstance();
+    	this.dao = new PrenotazioneDAO();
+    }
+    
+    public StaffDashboardServlet(CatalogoPrenotazioni catalogo, PrenotazioneDAO dao) {
+    	this.catalogo = catalogo;
+    	this.dao = dao;
+    }
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
