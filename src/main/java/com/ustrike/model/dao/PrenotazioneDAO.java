@@ -219,4 +219,21 @@ public class PrenotazioneDAO {
             return ps.executeUpdate() > 0;
         }
     }
+    
+    public boolean annullaPrenotazioneCliente(int idPrenotazione, int idCliente) throws SQLException {
+        String sql =
+            "UPDATE Prenotazione " +
+            "SET StatoPrenotazione = 'Annullata' " +
+            "WHERE IDPrenotazione = ? AND IDCliente = ? AND StatoPrenotazione = 'In attesa'";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, idPrenotazione);
+            ps.setInt(2, idCliente);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
 }

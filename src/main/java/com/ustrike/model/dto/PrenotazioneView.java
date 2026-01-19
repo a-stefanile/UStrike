@@ -56,4 +56,5 @@ public class PrenotazioneView implements Serializable {
 
     public String getNoteStaff() { return noteStaff; }
     public void setNoteStaff(String noteStaff) { this.noteStaff = noteStaff; }
+    
 }

@@ -140,4 +140,15 @@ public class PrenotazioneService {
             // se fallisce la lettura per invalidare, non blocca l'operazione principale
         }
     }
+    
+    public boolean annullaPrenotazioneCliente(int idPrenotazione, int idCliente, HttpSession session) {
+        try {
+            boolean ok = dao.annullaPrenotazioneCliente(idPrenotazione, idCliente);
+            if (ok) invalidateCacheCliente(session, idCliente);
+            return ok;
+        } catch (Exception e) {
+            throw new RuntimeException("Errore annullamento prenotazione", e);
+        }
+    }
+
 }
