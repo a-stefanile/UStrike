@@ -32,15 +32,26 @@ body {
     width: auto;
 }
 
-
 /* Titolo */
 h2 {
     margin-left: 20px;
-    margin-top: 70px; /* stesso livello verticale del logo */
+    margin-top: 70px;
     font-size: 2.5rem;
     font-weight: 600;
     color: #ffffff;
     line-height: 1.2;
+}
+
+/* Alert successo */
+.alert-success {
+    margin-left: 20px;
+    margin-top: 15px;
+    padding: 12px 18px;
+    background: rgba(46,125,50,0.15);
+    border: 1px solid #2e7d32;
+    border-radius: 12px;
+    color: #a5d6a7;
+    max-width: 520px;
 }
 
 /* Nessuna prenotazione */
@@ -51,6 +62,7 @@ h2 {
     opacity: 0.9;
 }
 
+/* Nuova prenotazione */
 .new-pren-btn {
     display: inline-block;
     margin-left: 20px;
@@ -69,11 +81,12 @@ h2 {
     box-shadow: 0 10px 20px rgba(228, 47, 28, 0.5);
 }
 
-/* Table styling */
+/* Table */
 table {
     width: 95%;
     max-width: 1100px;
     margin-left: 20px;
+    margin-top: 20px;
     border-collapse: collapse;
     background: rgba(0,13,29,0.85);
     border-radius: 15px;
@@ -93,19 +106,76 @@ th {
     text-align: left;
 }
 
-/* Badge stato prenotazione */
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    font-weight: 500;
+/* Hover riga */
+tbody tr:hover {
+    background: rgba(255,255,255,0.04);
 }
 
-.ok { border: 1px solid #2e7d32; color:#2e7d32; }
-.warn { border: 1px solid #ef6c00; color:#ef6c00; }
-.err { border: 1px solid #c62828; color:#c62828; }
+/* Badge stato */
+.badge {
+    padding: 4px 12px;
+    border-radius: 14px;
+    display: inline-block;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
 
-/* Logout in basso a destra */
+.ok { border: 1px solid #2e7d32; color:#81c784; }
+.warn { border: 1px solid #ef6c00; color:#ffb74d; }
+.err { border: 1px solid #c62828; color:#ef9a9a; }
+
+/* Bottone annulla */
+.btn-danger {
+    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+    color: #ffffff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220,38,38,0.6);
+}
+
+/* Modale dialog */
+dialog.modal {
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    background: rgba(0,13,29,0.95);
+    color: #ffffff;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+
+dialog.modal::backdrop {
+    background: rgba(0,0,0,0.6);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-secondary {
+    background: #374151;
+    color: #ffffff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+/* Home & Logout */
 .home-btn, .logout-btn {
     position: fixed;
     right: 20px;
@@ -120,14 +190,13 @@ th {
     gap: 8px;
     box-shadow: 0 10px 20px rgba(228, 47, 28, 0.5);
     transition: all 0.3s ease;
+    z-index: 1000;
 }
 
-/* Home sopra logout */
 .home-btn {
-    bottom: 70px; /* 50px sopra il logout */
+    bottom: 70px;
 }
 
-/* Logout in basso */
 .logout-btn {
     bottom: 20px;
 }
@@ -136,7 +205,6 @@ th {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(228, 47, 28, 0.6);
 }
-
 
 /* Responsive */
 @media (max-width: 768px) {
