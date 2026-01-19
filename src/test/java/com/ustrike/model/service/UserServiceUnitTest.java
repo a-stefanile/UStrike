@@ -18,11 +18,8 @@ class UserServiceUnitTest {
 
     private UserService userService;
 
-    @Mock
-    private ClienteDAO clienteDAOMock;
-
-    @Mock
-    private StaffDAO staffDAOMock;
+    @Mock private ClienteDAO clienteDAOMock;
+    @Mock private StaffDAO staffDAOMock;
 
     @BeforeEach
     void setUp() {
@@ -30,68 +27,106 @@ class UserServiceUnitTest {
         userService = new UserService(clienteDAOMock, staffDAOMock);
     }
 
+    // --- TEST AUTHENTICATE (LOGIN) ---
+
     @Test
     void testAuthenticateUser_ClienteSuccesso() throws Exception {
-        // Arrange
-        String email = "test@cliente.it";
+        String email = "mario@test.it";
         String password = "password123";
         String hash = PasswordHasher.hash(password);
 
-        Cliente cFinto = new Cliente();
-        cFinto.setIDCliente(1);
-        cFinto.setEmail(email);
-        cFinto.setNomeCliente("Mario");
-        cFinto.setPasswordHash(hash);
+        Cliente c = new Cliente();
+        c.setIDCliente(10);
+        c.setNomeCliente("Mario");
+        c.setPasswordHash(hash);
 
-        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(cFinto);
+        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(c);
 
-        // Act
         Object[] result = (Object[]) userService.authenticateUser(email, password);
 
-        // Assert
         assertNotNull(result);
         assertEquals("cliente", result[0]);
-        assertEquals(1, result[1]);
+        assertEquals(10, result[1]);
         assertEquals("Mario", result[2]);
     }
 
     @Test
-    void testAuthenticateUser_LoginFallito() throws Exception {
-        // Arrange
-        String email = "wrong@user.it";
-        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(null);
-        when(staffDAOMock.doRetrieveByEmail(email)).thenReturn(null);
+    void testAuthenticateUser_StaffSuccesso() throws Exception {
+        String email = "staff@ustrike.it";
+        String password = "staffPassword";
+        String hash = PasswordHasher.hash(password);
 
-        // Act
-        Object result = userService.authenticateUser(email, "anyPassword");
-
-        // Assert
-        assertNull(result);
-    }
-
-    @Test
-    void testCreateCliente_EmailGiaEsistente() throws Exception {
-
-        Cliente nuovoCliente = new Cliente();
-        nuovoCliente.setEmail("esiste@test.it");
-
-        when(clienteDAOMock.selectClienteByEmail("esiste@test.it")).thenReturn(new Cliente());
-
-        boolean creato = userService.createCliente(nuovoCliente, "password");
-
-
-        assertFalse(creato, "Non dovrebbe permettere la registrazione se l'email esiste");
-        verify(clienteDAOMock, never()).insertCliente(any());
-    }
-
-    @Test
-    void testUpdateUser_StaffSuccesso() throws Exception {
         Staff s = new Staff();
-        when(staffDAOMock.doUpdate(s)).thenReturn(true);
+        s.setIDStaff(20);
+        s.setNomeStaff("Anna");
+        s.setPasswordHash(hash);
 
-        boolean esito = userService.updateUser(s, "staff");
+        // Simuliamo che non sia un cliente ma sia uno staff
+        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(null);
+        when(staffDAOMock.doRetrieveByEmail(email)).thenReturn(s);
+
+        Object[] result = (Object[]) userService.authenticateUser(email, password);
+
+        assertNotNull(result);
+        assertEquals("staff", result[0]);
+        assertEquals(20, result[1]);
+    }
+
+    // --- TEST REGISTRAZIONE ---
+
+    @Test
+    void testCreateCliente_Successo_ConHash() throws Exception {
+        Cliente nuovo = new Cliente();
+        nuovo.setEmail("nuovo@test.it");
+        String passPlain = "secret123";
+
+        when(clienteDAOMock.selectClienteByEmail(anyString())).thenReturn(null);
+        when(clienteDAOMock.insertCliente(any(Cliente.class))).thenReturn(true);
+
+        boolean esito = userService.createCliente(nuovo, passPlain);
 
         assertTrue(esito);
-        verify(staffDAOMock).doUpdate(s);
+        // Verifica che la password salvata nel DTO sia stata hashata (non è più "secret123")
+        assertNotEquals(passPlain, nuovo.getPasswordHash());
+        assertTrue(PasswordHasher.verify(passPlain, nuovo.getPasswordHash()));
+        verify(clienteDAOMock).insertCliente(nuovo);
+    }
+
+    // --- TEST CHANGE PASSWORD ---
+
+    @Test
+    void testChangePassword_Successo() throws Exception {
+        String email = "mario@test.it";
+        String vecchia = "vecchiaPass";
+        String nuova = "nuovaPass";
+        String hashVecchio = PasswordHasher.hash(vecchia);
+
+        Cliente c = new Cliente();
+        c.setIDCliente(10);
+        c.setPasswordHash(hashVecchio);
+
+        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(c);
+        when(clienteDAOMock.updatePassword(eq(10), anyString())).thenReturn(true);
+
+        boolean esito = userService.changePassword(email, "cliente", vecchia, nuova);
+
+        assertTrue(esito);
+        // Verifica che il DAO riceva un nuovo hash diverso dal vecchio
+        verify(clienteDAOMock).updatePassword(eq(10), argThat(h -> !h.equals(hashVecchio)));
+    }
+
+    @Test
+    void testChangePassword_VecchiaErrata_Fallimento() throws Exception {
+        String email = "mario@test.it";
+        Cliente c = new Cliente();
+        c.setPasswordHash(PasswordHasher.hash("giusta"));
+
+        when(clienteDAOMock.selectClienteByEmail(email)).thenReturn(c);
+
+        // Tentativo con password "sbagliata"
+        boolean esito = userService.changePassword(email, "cliente", "sbagliata", "nuova");
+
+        assertFalse(esito);
+        verify(clienteDAOMock, never()).updatePassword(anyInt(), anyString());
     }
 }
