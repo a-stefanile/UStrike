@@ -16,6 +16,14 @@ public class AnnullaPrenotazioneServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private PrenotazioneService service = new PrenotazioneService();
+	
+	public AnnullaPrenotazioneServlet() {
+		this.service = new PrenotazioneService();
+	}
+	
+	public AnnullaPrenotazioneServlet(PrenotazioneService service) {
+		this.service = service;
+	}
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
