@@ -169,4 +169,119 @@ class PrenotazioneServiceUnitTest {
         Exception ex = assertThrows(RuntimeException.class, () -> service.getCatalogoInAttesa());
         assertEquals("Errore catalogo in attesa", ex.getMessage());
     }
+ // --- TEST getCatalogoCompletate ---
+
+    @Test
+    void testGetCatalogoCompletate_ErrorWrapping() throws Exception {
+        when(daoMock.selectPrenotazioniCompletate()).thenThrow(new RuntimeException("SQL Error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.getCatalogoCompletate());
+        assertEquals("Errore catalogo completate", ex.getMessage());
+        assertNotNull(ex.getCause());
+    }
+
+ // --- TEST getPrenotazioniCliente (cache + error wrapping) ---
+
+    @Test
+    void testGetPrenotazioniCliente_CacheHit() throws Exception {
+        int idCliente = 1;
+        String cacheKey = "prenotazioni_1";
+        List<Prenotazione> listaInCache = new ArrayList<>();
+
+        when(sessionMock.getAttribute(cacheKey)).thenReturn(listaInCache);
+
+        List<Prenotazione> risultato = service.getPrenotazioniCliente(idCliente, sessionMock);
+
+        assertSame(listaInCache, risultato);
+        verifyNoInteractions(daoMock);
+    }
+
+    @Test
+    void testGetPrenotazioniCliente_CacheMiss() throws Exception {
+        int idCliente = 1;
+        String cacheKey = "prenotazioni_1";
+        List<Prenotazione> listaDalloStore = new ArrayList<>();
+
+        when(sessionMock.getAttribute(cacheKey)).thenReturn(null);
+        when(daoMock.selectPrenotazioniByCliente(idCliente)).thenReturn(listaDalloStore);
+
+        List<Prenotazione> risultato = service.getPrenotazioniCliente(idCliente, sessionMock);
+
+        assertSame(listaDalloStore, risultato);
+        verify(sessionMock).setAttribute(cacheKey, listaDalloStore);
+    }
+
+    @Test
+    void testGetPrenotazioniCliente_ErrorWrapping() throws Exception {
+        int idCliente = 1;
+        when(sessionMock.getAttribute("prenotazioni_1")).thenReturn(null);
+        when(daoMock.selectPrenotazioniByCliente(idCliente)).thenThrow(new RuntimeException("SQL Error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> service.getPrenotazioniCliente(idCliente, sessionMock));
+
+        assertEquals("Errore prenotazioni cliente", ex.getMessage());
+        assertNotNull(ex.getCause());
+    }
+
+    @Test
+    void testGetPrenotazioniCliente_SessioneNull_Funziona() throws Exception {
+        int idCliente = 1;
+        List<Prenotazione> listaDalloStore = new ArrayList<>();
+        when(daoMock.selectPrenotazioniByCliente(idCliente)).thenReturn(listaDalloStore);
+
+        List<Prenotazione> risultato = service.getPrenotazioniCliente(idCliente, null);
+
+        assertSame(listaDalloStore, risultato);
+    }
+
+ // TEST annullaPrenotazioneCliente ---
+
+    @Test
+    void testAnnullaPrenotazioneCliente_Successo_PulisceCache() throws Exception {
+        int idPreno = 10;
+        int idCliente = 5;
+
+        when(daoMock.annullaPrenotazioneCliente(idPreno, idCliente)).thenReturn(true);
+
+        boolean esito = service.annullaPrenotazioneCliente(idPreno, idCliente, sessionMock);
+
+        assertTrue(esito);
+        verify(sessionMock).removeAttribute("prenotazioni_" + idCliente);
+        verify(sessionMock).removeAttribute("prenotazioni_view_" + idCliente);
+    }
+
+    @Test
+    void testAnnullaPrenotazioneCliente_Fallimento_NonPulisceCache() throws Exception {
+        int idPreno = 10;
+        int idCliente = 5;
+
+        when(daoMock.annullaPrenotazioneCliente(idPreno, idCliente)).thenReturn(false);
+
+        boolean esito = service.annullaPrenotazioneCliente(idPreno, idCliente, sessionMock);
+
+        assertFalse(esito);
+        verify(sessionMock, never()).removeAttribute(anyString());
+    }
+
+    @Test
+    void testAnnullaPrenotazioneCliente_SessioneNull_NonCrasha() throws Exception {
+        when(daoMock.annullaPrenotazioneCliente(anyInt(), anyInt())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+            service.annullaPrenotazioneCliente(10, 5, null)
+        );
+    }
+
+    @Test
+    void testAnnullaPrenotazioneCliente_ErrorWrapping() throws Exception {
+        when(daoMock.annullaPrenotazioneCliente(anyInt(), anyInt()))
+                .thenThrow(new RuntimeException("SQL Error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> service.annullaPrenotazioneCliente(10, 5, sessionMock));
+
+        assertEquals("Errore annullamento prenotazione", ex.getMessage());
+        assertNotNull(ex.getCause());
+    }
 }
