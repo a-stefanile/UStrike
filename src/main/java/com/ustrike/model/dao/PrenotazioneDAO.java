@@ -210,4 +210,13 @@ public class PrenotazioneDAO {
 
         return list;
     }
+    
+    public boolean doDelete(int idPrenotazione) throws SQLException {
+        String sql = "DELETE FROM Prenotazione WHERE IDPrenotazione = ?";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idPrenotazione);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }
