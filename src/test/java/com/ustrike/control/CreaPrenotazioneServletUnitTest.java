@@ -124,4 +124,18 @@ class CreaPrenotazioneServletUnitTest {
         writer.flush();
         assertTrue(stringWriter.toString().contains("\"success\":false"));
     }
+    
+    @Test
+    void testDoPost_UtenteNonAutorizzato_BadPath() throws Exception {
+        when(request.getMethod()).thenReturn("POST");
+        // Sessione nulla
+        when(request.getSession(false)).thenReturn(null);
+
+        servlet.service(request, response);
+
+        // Verifica che venga inviato l'errore 401 Unauthorized
+        verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+    
+    
 }
