@@ -1,4 +1,4 @@
-package com.ustrike.model.service;
+package com.ustrike.model.service.UnitTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import com.ustrike.model.dao.PrenotazioneDAO;
 import com.ustrike.model.dto.Prenotazione;
 import com.ustrike.model.dto.PrenotazioneView;
+import com.ustrike.model.service.PrenotazioneService;
 
 import jakarta.servlet.http.HttpSession;
 

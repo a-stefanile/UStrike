@@ -1,4 +1,4 @@
-package com.ustrike.model.service;
+package com.ustrike.model.service.UnitTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.ustrike.model.dao.ServizioDAO;
 import com.ustrike.model.dto.Servizio;
+import com.ustrike.model.service.ServizioService;
 
 class ServizioServiceUnitTest {
 

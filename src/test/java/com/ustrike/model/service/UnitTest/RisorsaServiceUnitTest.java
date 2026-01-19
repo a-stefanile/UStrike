@@ -1,4 +1,4 @@
-package com.ustrike.model.service;
+package com.ustrike.model.service.UnitTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.ustrike.model.dao.RisorsaDAO;
 import com.ustrike.model.dto.Risorsa;
+import com.ustrike.model.service.RisorsaService;
 
 class RisorsaServiceUnitTest {
 

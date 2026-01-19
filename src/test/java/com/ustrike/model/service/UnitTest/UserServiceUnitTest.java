@@ -1,4 +1,4 @@
-package com.ustrike.model.service;
+package com.ustrike.model.service.UnitTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -12,6 +12,7 @@ import com.ustrike.model.dao.ClienteDAO;
 import com.ustrike.model.dao.StaffDAO;
 import com.ustrike.model.dto.Cliente;
 import com.ustrike.model.dto.Staff;
+import com.ustrike.model.service.UserService;
 import com.ustrike.util.PasswordHasher;
 
 class UserServiceUnitTest {
