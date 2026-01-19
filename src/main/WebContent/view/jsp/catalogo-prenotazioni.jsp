@@ -5,7 +5,7 @@
 <%
     String ctx = request.getContextPath();
     String filter = (String) request.getAttribute("filter");
-    if (filter == null) filter = "inAttesa";
+    if (filter == null) filter = "In attesa";
     List<Prenotazione> prenotazioni = (List<Prenotazione>) request.getAttribute("prenotazioni");
 %>
 
