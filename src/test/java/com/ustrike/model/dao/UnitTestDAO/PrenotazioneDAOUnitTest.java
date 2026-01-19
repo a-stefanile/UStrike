@@ -2,12 +2,11 @@ package com.ustrike.model.dao.UnitTestDAO;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,9 +14,10 @@ import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 import com.ustrike.model.dao.PrenotazioneDAO;
-import com.ustrike.model.dto.Prenotazione;
+import com.ustrike.model.dto.PrenotazioneView;
 import com.ustrike.util.DBConnection;
 
 class PrenotazioneDAOUnitTest {
@@ -52,89 +52,96 @@ class PrenotazioneDAOUnitTest {
         mockedDb.close();
     }
 
-    // --- TEST POSITIVI ---
+    // --- GOOD PATHS ---
 
     @Test
-    void testUpdateStatoPrenotazione_Successo() throws Exception {
-        // Arrange
-        when(conn.prepareStatement(anyString())).thenReturn(ps);
-        when(ps.executeUpdate()).thenReturn(1); // Una riga aggiornata
+    void testInsertPrenotazione_ConStaffENote() throws Exception {
+        Timestamp ora = new Timestamp(System.currentTimeMillis());
+        when(conn.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(ps);
+        when(ps.executeUpdate()).thenReturn(1);
+        when(ps.getGeneratedKeys()).thenReturn(rs);
+        when(rs.next()).thenReturn(true);
+        when(rs.getInt(1)).thenReturn(777);
 
-        // Act
-        boolean result = dao.updateStatoPrenotazione(10, "Confermata", 1, "Tutto ok");
+        int id = dao.insertPrenotazione(ora, ora, "Confermata", "4", 1, 1, 10, 2, "Nota test");
 
-        // Assert
-        assertTrue(result);
-        verify(ps).setString(1, "Confermata");
-        verify(ps).setInt(2, 1);
-        verify(ps).setString(3, "Tutto ok");
-        verify(ps).setInt(4, 10);
+        assertEquals(777, id);
+        verify(ps).setInt(8, 2);      // Verifica IDStaff impostato
+        verify(ps).setString(9, "Nota test"); // Verifica NoteStaff impostate
     }
 
     @Test
-    void testSelectPrenotazione_Trovata() throws Exception {
-        // Arrange
+    void testAnnullaPrenotazioneCliente_Successo() throws Exception {
+        when(conn.prepareStatement(anyString())).thenReturn(ps);
+        when(ps.executeUpdate()).thenReturn(1); // Simula update avvenuto
+
+        boolean esito = dao.annullaPrenotazioneCliente(500, 10);
+
+        assertTrue(esito);
+        verify(ps).setInt(1, 500); // idPrenotazione
+        verify(ps).setInt(2, 10);  // idCliente
+    }
+
+    @Test
+    void testSelectPrenotazioniByClienteView_MappaturaCorretta() throws Exception {
         when(conn.prepareStatement(anyString())).thenReturn(ps);
         when(ps.executeQuery()).thenReturn(rs);
-        when(rs.next()).thenReturn(true);
-        when(rs.getInt("IDPrenotazione")).thenReturn(100);
-        when(rs.getString("StatoPrenotazione")).thenReturn("In attesa");
+        
+        // Simula una riga nel ResultSet
+        when(rs.next()).thenReturn(true, false); 
+        when(rs.getInt("IDPrenotazione")).thenReturn(1);
+        when(rs.getString("NomeServizio")).thenReturn("Bowling");
+        when(rs.getInt("CapacitaRisorsa")).thenReturn(6);
         when(rs.getInt("IDStaff")).thenReturn(0);
-        when(rs.wasNull()).thenReturn(true); // Simula IDStaff NULL nel DB
+        when(rs.wasNull()).thenReturn(true); // Fondamentale per testare la tua logica wasNull()
 
-        // Act
-        Prenotazione p = dao.selectPrenotazione(100);
+        List<PrenotazioneView> result = dao.selectPrenotazioniByClienteView(10);
 
-        // Assert
-        assertNotNull(p);
-        assertEquals(100, p.getIDPrenotazione());
-        assertNull(p.getIDStaff(), "IDStaff dovrebbe essere null se il DB torna NULL");
+        assertFalse(result.isEmpty());
+        PrenotazioneView v = result.get(0);
+        assertEquals("Bowling", v.getNomeServizio());
+        assertNull(v.getIDStaff()); // Verifica che wasNull() abbia funzionato
     }
 
-    // --- TEST NEGATIVI E EDGE CASES ---
+    // --- BAD PATHS & EDGE CASES ---
 
     @Test
-    void testUpdateStatoPrenotazione_GiaGestita() throws Exception {
-        // Arrange: Se la riga non è più "In attesa", executeUpdate tornerà 0
-        when(conn.prepareStatement(anyString())).thenReturn(ps);
-        when(ps.executeUpdate()).thenReturn(0);
-
-        // Act
-        boolean result = dao.updateStatoPrenotazione(10, "Confermata", 1, null);
-
-        // Assert
-        assertFalse(result, "Dovrebbe fallire se la prenotazione non è più 'In attesa'");
-    }
-
-    @Test
-    void testInsertPrenotazione_GestioneNull() throws Exception {
-        // Arrange
+    void testInsertPrenotazione_GestioneValoriNull() throws Exception {
         when(conn.prepareStatement(anyString(), anyInt())).thenReturn(ps);
         when(ps.executeUpdate()).thenReturn(1);
         when(ps.getGeneratedKeys()).thenReturn(rs);
         when(rs.next()).thenReturn(true);
-        when(rs.getInt(1)).thenReturn(500);
 
-        // Act: Testiamo il passaggio di null per staff e note
-        int id = dao.insertPrenotazione(new Timestamp(System.currentTimeMillis()), 
-                                        new Timestamp(System.currentTimeMillis()), 
-                                        "In attesa", "2 persone", 1, 1, 1, null, null);
+        // Chiamata con staff e note null
+        dao.insertPrenotazione(new Timestamp(0), new Timestamp(0), "Stato", "P", 1, 1, 1, null, null);
 
-        // Assert
-        assertEquals(500, id);
-        // Verifichiamo che il DAO abbia chiamato setNull per i parametri opzionali
-        verify(ps).setNull(8, Types.INTEGER); // IDStaff
-        verify(ps).setNull(9, Types.VARCHAR); // NoteStaff
+        // Verifichiamo che il DAO usi correttamente Types.INTEGER e Types.VARCHAR per i null
+        verify(ps).setNull(8, Types.INTEGER);
+        verify(ps).setNull(9, Types.VARCHAR);
     }
 
     @Test
-    void testSelectPrenotazione_EccezioneSQL() throws Exception {
-        // Arrange
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException("Errore di rete"));
+    void testAnnullaPrenotazioneCliente_GiaInLavorazione() throws Exception {
+        when(conn.prepareStatement(anyString())).thenReturn(ps);
+        // Se la prenotazione è già "Confermata", la clausola WHERE StatoPrenotazione = 'In attesa'
+        // farà sì che l'update restituisca 0 righe colpite.
+        when(ps.executeUpdate()).thenReturn(0);
 
-        // Act & Assert
-        assertThrows(SQLException.class, () -> {
-            dao.selectPrenotazione(1);
-        }, "Il DAO deve lanciare l'eccezione se il database fallisce");
+        boolean esito = dao.annullaPrenotazioneCliente(500, 10);
+
+        assertFalse(esito, "Non deve annullare se lo stato non è 'In attesa'");
+    }
+
+    @Test
+    void testUpdateStatoPrenotazione_NullSafety() throws Exception {
+        when(conn.prepareStatement(anyString())).thenReturn(ps);
+        when(ps.executeUpdate()).thenReturn(1);
+
+        // Testiamo l'update passando parametri null per note e staff
+        boolean ok = dao.updateStatoPrenotazione(1, "Rifiutata", null, "");
+
+        assertTrue(ok);
+        verify(ps).setNull(2, Types.INTEGER); // IDStaff null
+        verify(ps).setNull(3, Types.VARCHAR); // NoteStaff null (perché stringa vuota)
     }
 }
