@@ -18,6 +18,10 @@ public class RegistrazioneServlet extends HttpServlet {
     private static final String VIEW_REGISTER = "/view/jsp/register.jsp";
     private static final String VIEW_LOGIN    = "/view/jsp/login.jsp";
 
+    // ✅ NUOVO PATTERN: Accetta lettere, spazi, apostrofi e accenti. Niente numeri o simboli.
+    private static final Pattern NAME_PATTERN = 
+            Pattern.compile("^[a-zA-Z\\s'àèéìòùÀÈÉÌÒÙ]+$");
+
     // Password: >=8, maiusc, minusc, numero, speciali 
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$");
@@ -28,18 +32,13 @@ public class RegistrazioneServlet extends HttpServlet {
     private UserService userService;
 
     public RegistrazioneServlet() {
-    	this.userService = new UserService();
+        this.userService = new UserService();
     }
     
     public RegistrazioneServlet(UserService userService) {
-    	this.userService = userService;
+        this.userService = userService;
     }
-    /*
-    @Override
-    public void init() throws ServletException {
-        userService = new UserService();
-    }
-*/
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -55,17 +54,34 @@ public class RegistrazioneServlet extends HttpServlet {
         String email       = request.getParameter("email").trim().toLowerCase();
         String password    = request.getParameter("password");
         String confPassword= request.getParameter("confPassword");
-
         
         StringBuilder errors = new StringBuilder();
-        if (nome.length() < 2)                  errors.append("Nome: min 2 caratteri. ");
-        if (cognome.length() < 2)               errors.append("Cognome: min 2 caratteri. ");
-        if (!EMAIL_PATTERN.matcher(email).matches())
-                                              errors.append("Email non valida. ");
-        if (password == null || !PASSWORD_PATTERN.matcher(password).matches())
-                                              errors.append("Password: deve avere almeno 8 caratteri di cui almeno: 1 maiusc/1 minusc/1 numero. ");
-        if (!password.equals(confPassword))     errors.append("Password non corrispondono. ");
 
+        // --- VALIDAZIONE NOME ---
+        if (nome.length() < 2) {
+            errors.append("Nome: min 2 caratteri. ");
+        } else if (!NAME_PATTERN.matcher(nome).matches()) {
+            errors.append("Nome: non valido (no numeri o simboli). ");
+        }
+
+        // --- VALIDAZIONE COGNOME ---
+        if (cognome.length() < 2) {
+            errors.append("Cognome: min 2 caratteri. ");
+        } else if (!NAME_PATTERN.matcher(cognome).matches()) {
+            errors.append("Cognome: non valido (no numeri o simboli). ");
+        }
+
+        // --- ALTRE VALIDAZIONI ---
+        if (!EMAIL_PATTERN.matcher(email).matches())
+            errors.append("Email non valida. ");
+
+        if (password == null || !PASSWORD_PATTERN.matcher(password).matches())
+            errors.append("Password: deve avere almeno 8 caratteri di cui almeno: 1 maiusc/1 minusc/1 numero. ");
+        
+        if (!password.equals(confPassword))     
+            errors.append("Password non corrispondono. ");
+
+        // Se ci sono errori, torna alla JSP con i messaggi
         if (errors.length() > 0) {
             request.setAttribute("errorMessage", errors.toString());
             request.setAttribute("nome", nome);
@@ -82,7 +98,7 @@ public class RegistrazioneServlet extends HttpServlet {
             cliente.setEmail(email);
             cliente.setPuntiTicket(0);
 
-            // ✅ UserService gestisce hash + unique check
+            // UserService gestisce hash + unique check
             boolean creato = userService.createCliente(cliente, password);
 
             if (creato) {
